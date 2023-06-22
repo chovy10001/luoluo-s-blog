@@ -17,7 +17,7 @@ export default hopeTheme({
 
   logo: "/assets/images/home/me.jpg",
 
-  repo: "vuepress-theme-hope/vuepress-theme-hope",
+  repo: "https://github.com/chovy10001/luoluo-s-blog",
 
   docsDir: "src",
 
