@@ -1,0 +1,13290 @@
+---
+category:
+    - 前端项目
+tag:
+    - Vue3
+    - elementPlus
+---
+# 小兔鲜电商平台
+### 项目初始化与git管理
+
+#### 项目初始化
+
+使用命令`pnpm create vue@latest`
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685505712022-7fcde5af-4d13-4c28-913d-ac5f2e66a296.png#averageHue=%2322211f&clientId=ua8b1aea1-d99a-4&from=paste&height=213&id=u215fc5d0&originHeight=266&originWidth=809&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=39291&status=done&style=none&taskId=u7358c6be-bc1d-45d3-94bf-29a0161363c&title=&width=647.2)
+
+
+使用命令`pnpm i`安装依赖包
+在src文件夹下新建目录apis(API接口文件夹)、composables(组合函数文件夹)、directives(全局指令文件夹)、styles(全局样式文件夹)、utils(工具函数文件夹)
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685506145482-20aaac53-a1cd-447b-855f-230f2d753e23.png#averageHue=%231c1b1b&clientId=ua8b1aea1-d99a-4&from=paste&height=529&id=u4f7d4c99&originHeight=661&originWidth=323&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=24136&status=done&style=none&taskId=uf48b6c99-c04c-4622-b5dc-706003a77d3&title=&width=258.4)
+
+#### git管理
+
+使用命令
+
+```Plain Text
+git init 
+git add .
+git commit -m "项目初始化"
+```
+
+### 配置别名路径联想提示
+
+1.在项目的根目录下新增`jsconfig.json`文件
+2.添加json格式的配置项，如下：
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685507218328-410106dd-ec1a-4682-80dc-fc1571b87a64.png#averageHue=%231e1e1d&clientId=ua8b1aea1-d99a-4&from=paste&height=322&id=u43c23ea4&originHeight=402&originWidth=942&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=31770&status=done&style=none&taskId=u52f48651-5129-4c57-895e-f49e9c46b7e&title=&width=753.6)
+
+```JSON
+{
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*":[
+        "src/*"
+      ]
+    }
+  }
+}
+```
+
+### 配置elementPlus按需自动导入
+
+```JavaScript
+pnpm i element-plus -S
+pnpm i -D unplugin-vue-components unplugin-auto-import
+```
+
+在`vite.config.js`中的配置
+
+```JavaScript
+import { fileURLToPath, URL } from 'node:url'
+
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+
+// elementplus按需自动导入
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
+import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    vue(),
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+    }),
+    Components({
+      resolvers: [ElementPlusResolver()],
+    }),
+  ],
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
+});
+
+```
+
+### elementPlus主题色定制
+
+#### 1.安装sass
+
+`pnpm i sass -D`
+
+#### 2.在style文件夹下新增目录element添加index.scss
+
+styles/element/index.scss
+
+```JavaScript
+// 只需要重写你需要的即可
+@forward 'element-plus/theme-chalk/src/common/var.scss' with(
+    $colors:(
+        'primary':(
+            //主色
+            'base':#27ba9b,
+        ),
+        'success':(
+            //成功色
+            'base':#1dc779
+        ),
+        'warning':(
+            // 警告色
+            'base':#ffb302
+        ),
+        'danger':(
+            // 危险色
+            'base':#e26237
+        ),
+        'error':(
+            // 错误色
+            'base':#cf4444
+        )
+    )
+)
+```
+
+#### 3.自动导入配置
+
+1. 配置elementPlus采用sass样式配色系统
+
+2. 自动导入定制化样式文件进行样式覆盖
+
+```JavaScript
+import { fileURLToPath, URL } from "node:url";
+
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+
+// elementplus按需自动导入
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
+import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    vue(),
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+    }),
+    Components({
+      resolvers: [
+        // 1.配置elementPlus采用sass样式配色系统
+        ElementPlusResolver({ importStyle: "sass" }),
+      ],
+    }),
+  ],
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // 2.自动导入定制化样式文件进行样式覆盖
+        additionalData: `
+        @use "@/styles/element/index.scss" as *;
+        `
+      }
+    }
+  }
+});
+
+```
+
+### axios基础配置
+
+安装axios`pnpm i axios`
+在utils下新建http.js
+utils/http.js
+
+```JavaScript
+//axios的基础封装
+import axios from 'axios'
+
+const httpInstance = axios.create({
+    baseURL: 'http://pcapi-xiaotuxian-front-devtest.itheima.net',
+    timeout:5000
+})
+
+//拦截器
+
+//请求拦截器
+httpInstance.interceptors.request.use(config => {
+    return config
+}, e => Promise.reject(e))
+
+// 响应式拦截器
+httpInstance.interceptors.response.use(res => res.data, e => {
+    return Promise.reject(e)
+})
+
+export default httpInstance
+```
+
+测试
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685512944136-0be0f90b-8af4-4f4b-a00b-106a011463c2.png#averageHue=%23232120&clientId=ua8b1aea1-d99a-4&from=paste&height=151&id=u7f2bf3e1&originHeight=189&originWidth=472&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=16484&status=done&style=none&taskId=u1ee8788f-1d1e-4b2c-bed9-c53c52efb05&title=&width=377.6)
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685512959156-6e2d090a-56d1-4d35-89f3-0bb40b18db31.png#averageHue=%2320201f&clientId=ua8b1aea1-d99a-4&from=paste&height=386&id=ua6e16260&originHeight=482&originWidth=789&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=40999&status=done&style=none&taskId=u81dc0d89-a29b-4720-a136-9b7d5767ddd&title=&width=631.2)
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685512978960-ff74e49e-c90d-4335-a5c2-eb71358392a9.png#averageHue=%2322252a&clientId=ua8b1aea1-d99a-4&from=paste&height=89&id=u75f6564c&originHeight=111&originWidth=604&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=8092&status=done&style=none&taskId=u6fe7b899-78da-4f86-9088-706fc693883&title=&width=483.2)
+
+### 路由基础配置
+
+- 降低eslint规范，不再强制要求组件命名
+
+```JavaScript
+/* eslint-env node */
+module.exports = {
+  root: true,
+  'extends': [
+    'plugin:vue/vue3-essential',
+    'eslint:recommended'
+  ],
+  parserOptions: {
+    ecmaVersion: 'latest'
+  },
+  rules: {
+    'vue/multi-word-component-names': 0,//不在强制要求组件命名
+  }
+}
+
+```
+
+- 添加路由页面Layout，Home，Login，Category
+
+router/index.js
+
+```JavaScript
+// createRouter:创建router实例对象
+// createWebHistory:创建history模式的路由
+
+
+import { createRouter, createWebHistory } from "vue-router"
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  //path和component对应关系的位置
+  routes: [
+    {
+      path: "/",
+      component: () => import("@/views/Layout/index.vue"),
+      children: [
+        {
+          path: "",
+          component: () => import("@/views/Home/index.vue"),
+        },
+        {
+          path: "category",
+          component: () => import("@/views/Category/index.vue"),
+        },
+      ],
+    },
+    {
+      path: "/login",
+      component: () => import("@/views/Login/index.vue"),
+    },
+  ],
+});
+
+export default router;
+
+```
+
+### 静态资源引入和errorlen安装
+
+在main.js引入
+
+```JavaScript
+import './assets/main.css'
+
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+
+import App from './App.vue'
+import router from './router'
+
+// 引入初始化样式文件
+import '@/styles/common.scss'
+
+const app = createApp(App)
+
+app.use(createPinia())
+app.use(router)
+
+app.mount('#app')
+
+```
+
+将静态images文件放到assets下
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685515489658-9aca6ac5-cbaa-4d84-a38b-3d4fec59d85a.png#averageHue=%231a1a19&clientId=ua8b1aea1-d99a-4&from=paste&height=120&id=ua7b4c24e&originHeight=150&originWidth=297&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=5931&status=done&style=none&taskId=u886ee77a-845f-4074-9360-4700945ce92&title=&width=237.6)
+
+#### errorlens安装
+
+errorlens是一个实时提供错误信息的vscode插件，方便开发
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685515585087-c9789dad-a1ab-4e10-9d3b-4906d3465b08.png#averageHue=%23242322&clientId=ua8b1aea1-d99a-4&from=paste&height=205&id=ue146d14b&originHeight=256&originWidth=967&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=25546&status=done&style=none&taskId=ud2e79dbb-edad-4eca-ac30-b4e454ae48d&title=&width=773.6)
+
+### scss文件的自动导入
+
+在styles文件夹下新建var.scss
+
+```JavaScript
+$xtxColor:#27ba9b;
+$helpColor:#e26237;
+$sucColor:#1dc779;
+$warnColor:#ffb302;
+$priceColor:#cf4444;
+```
+
+在vite.config.js配置
+
+```JavaScript
+import { fileURLToPath, URL } from "node:url";
+
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+
+// elementplus按需自动导入
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
+import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [
+    vue(),
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+    }),
+    Components({
+      resolvers: [
+        // 1.配置elementPlus采用sass样式配色系统
+        ElementPlusResolver({ importStyle: "sass" }),
+      ],
+    }),
+  ],
+  resolve: {
+    alias: {
+      "@": fileURLToPath(new URL("./src", import.meta.url)),
+    },
+  },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // 2.自动导入定制化样式文件进行样式覆盖
+        additionalData: `  
+        @use "@/styles/element/index.scss" as *;
+        @use "@/styles/var.scss" as *;
+        `
+      }
+    }
+  }
+});
+
+```
+
+### 搭建Layout静态结构模板
+
+views/Layout/index.vue
+
+```JavaScript
+<script setup>
+import LayoutNav from './components/LayoutNav.vue'
+import LayoutHeader from './components/LayoutHeader.vue'
+import LayoutFooter from './components/LayoutFooter.vue'
+</script>
+<template>
+      <LayoutNav />
+      <LayoutHeader />
+      <RouterView />
+      <LayoutFooter />
+</template>
+```
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685516810811-53cbf23e-0290-4309-bb2a-dbe8957c3ae9.png#averageHue=%236a9b3f&clientId=ua8b1aea1-d99a-4&from=paste&height=126&id=u8a169ad5&originHeight=158&originWidth=322&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=10258&status=done&style=none&taskId=u74101e98-da46-4713-b484-d6e4351e434&title=&width=257.6)
+
+### 引入字体图标
+
+在index.html中引入
+
+```JavaScript
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_2143783_iq6z4ey5vu.css">
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
+
+```
+
+### 渲染一级导航
+
+apis文件夹下新建layout.js文件
+
+```JavaScript
+import httpInstance from "@/utils/http";
+
+export function getCategoryAPI() {
+    return httpInstance({
+        url: '/home/category/head'
+    })
+}
+```
+
+layoutHeader.vue获取数据渲染
+
+```JavaScript
+<script setup>
+import { getCategoryAPI } from '@/apis/layout';
+import { onMounted, ref } from 'vue';
+
+//渲染一级导航数据
+const categoryList = ref([])
+const getCategory = async () => {
+    const res = await getCategoryAPI()
+    categoryList.value = res.result
+}
+onMounted(() => {
+    getCategory()
+})
+</script>
+```
+
+### 吸顶导航交互实现
+
+新建LayoutFixed.vue吸顶导航
+使用命令`pnpm i @vueuse/core`
+使用插件获取到顶部的距离，大于一定距离就显示吸顶导航
+
+```JavaScript
+<script setup>
+import { useScroll } from '@vueuse/core'
+const { y } = useScroll(window)
+</script>
+
+<template>
+    <div class="app-header-sticky" :class="{ show: y > 78 }">
+        <div class="container">
+            <RouterLink class="logo" to="/" />
+            <!-- 导航区域 -->
+            <ul class="app-header-nav ">
+                <li class="home">
+                    <RouterLink to="/">首页</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/">居家</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/">美食</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/">服饰</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/">母婴</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/">个护</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/">严选</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/">数码</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/">运动</RouterLink>
+                </li>
+                <li>
+                    <RouterLink to="/">杂项</RouterLink>
+                </li>
+            </ul>
+
+            <div class="right">
+                <RouterLink to="/">品牌</RouterLink>
+                <RouterLink to="/">专题</RouterLink>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang='scss'>
+.app-header-sticky {
+    width: 100%;
+    height: 80px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 999;
+    background-color: #fff;
+    border-bottom: 1px solid #e4e4e4;
+    // 此处为关键样式!!!
+    // 状态一：往上平移自身高度 + 完全透明
+    transform: translateY(-100%);
+    opacity: 0;
+
+    // 状态二：移除平移 + 完全不透明
+    &.show {
+        transition: all 0.3s linear;
+        transform: none;
+        opacity: 1;
+    }
+
+    .container {
+        display: flex;
+        align-items: center;
+    }
+
+    .logo {
+        width: 200px;
+        height: 80px;
+        background: url("@/assets/images/logo.png") no-repeat right 2px;
+        background-size: 160px auto;
+    }
+
+    .right {
+        width: 220px;
+        display: flex;
+        text-align: center;
+        padding-left: 40px;
+        border-left: 2px solid $xtxColor;
+
+        a {
+            width: 38px;
+            margin-right: 40px;
+            font-size: 16px;
+            line-height: 1;
+
+            &:hover {
+                color: $xtxColor;
+            }
+        }
+    }
+}
+
+.app-header-nav {
+    width: 820px;
+    display: flex;
+    padding-left: 40px;
+    position: relative;
+    z-index: 998;
+
+    li {
+        margin-right: 40px;
+        width: 38px;
+        text-align: center;
+
+        a {
+            font-size: 16px;
+            line-height: 32px;
+            height: 32px;
+            display: inline-block;
+
+            &:hover {
+                color: $xtxColor;
+                border-bottom: 1px solid $xtxColor;
+            }
+        }
+
+        .active {
+            color: $xtxColor;
+            border-bottom: 1px solid $xtxColor;
+        }
+    }
+}
+</style>
+```
+
+### 请求导航数据优化
+
+在header组件和fixed组件都会用到导航数据，并且逻辑一样，请求到的数据一样，因此用pinia管理数据
+在stores中新建category.js
+
+```JavaScript
+import { ref } from "vue";
+import { defineStore } from "pinia";
+import { getCategoryAPI } from "@/apis/layout";
+
+export const useCategoryStore = defineStore("category", () => {
+  // 导航列表的数据管理
+  //state 导航列表数据
+  const categoryList = ref([]);
+  //action获取导航数据的方法
+  const getCategory = async () => {
+    const res = await getCategoryAPI();
+    categoryList.value = res.result;
+    };
+    return {
+        categoryList,
+        getCategory
+    }
+});
+
+```
+
+先在layout组件请求一次把数据存在pinia中，再在header组件和fixed组件中使用数据
+src/views/Layout/index.vue
+
+```JavaScript
+<script setup>
+import LayoutNav from './components/LayoutNav.vue'
+import LayoutHeader from './components/LayoutHeader.vue'
+import LayoutFooter from './components/LayoutFooter.vue'
+import LayoutFixed from './components/LayoutFixed.vue'
+
+//触发获取导航列表的action
+import { useCategoryStore } from '@/stores/category'
+import { onMounted } from 'vue'
+const categoryStore = useCategoryStore()
+onMounted(() => {
+  categoryStore.getCategory()
+})
+
+</script>
+<template>
+    <LayoutFixed />
+      <LayoutNav />
+      <LayoutHeader />
+      <RouterView />
+      <LayoutFooter />
+</template>
+```
+
+src/views/Layout/components/LayoutFixed.vue
+
+```JavaScript
+<script setup>
+import { useScroll } from '@vueuse/core'
+import { useCategoryStore } from '@/stores/category';
+const { y } = useScroll(window)
+
+//使用pinia中的数据
+const categoryStore = useCategoryStore()
+</script>
+
+<template>
+    <div class="app-header-sticky" :class="{ show: y > 78 }">
+        <div class="container">
+            <RouterLink class="logo" to="/" />
+            <!-- 导航区域 -->
+            <ul class="app-header-nav ">
+                <li class="home" v-for="item in categoryStore.categoryList" :key="item.id">
+                    <RouterLink to="/">{{ item.name }}</RouterLink>
+                </li>
+            </ul>
+
+            <div class="right">
+                <RouterLink to="/">品牌</RouterLink>
+                <RouterLink to="/">专题</RouterLink>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang='scss'>
+.app-header-sticky {
+    width: 100%;
+    height: 80px;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 999;
+    background-color: #fff;
+    border-bottom: 1px solid #e4e4e4;
+    // 此处为关键样式!!!
+    // 状态一：往上平移自身高度 + 完全透明
+    transform: translateY(-100%);
+    opacity: 0;
+
+    // 状态二：移除平移 + 完全不透明
+    &.show {
+        transition: all 0.3s linear;
+        transform: none;
+        opacity: 1;
+    }
+
+    .container {
+        display: flex;
+        align-items: center;
+    }
+
+    .logo {
+        width: 200px;
+        height: 80px;
+        background: url("@/assets/images/logo.png") no-repeat right 2px;
+        background-size: 160px auto;
+    }
+
+    .right {
+        width: 220px;
+        display: flex;
+        text-align: center;
+        padding-left: 40px;
+        border-left: 2px solid $xtxColor;
+
+        a {
+            width: 38px;
+            margin-right: 40px;
+            font-size: 16px;
+            line-height: 1;
+
+            &:hover {
+                color: $xtxColor;
+            }
+        }
+    }
+}
+
+.app-header-nav {
+    width: 820px;
+    display: flex;
+    padding-left: 40px;
+    position: relative;
+    z-index: 998;
+
+    li {
+        margin-right: 40px;
+        width: 38px;
+        text-align: center;
+
+        a {
+            font-size: 16px;
+            line-height: 32px;
+            height: 32px;
+            display: inline-block;
+
+            &:hover {
+                color: $xtxColor;
+                border-bottom: 1px solid $xtxColor;
+            }
+        }
+
+        .active {
+            color: $xtxColor;
+            border-bottom: 1px solid $xtxColor;
+        }
+    }
+}
+</style>
+```
+
+src/views/Layout/components/LayoutHeader.vue
+
+```JavaScript
+<script setup>
+import { useCategoryStore } from '@/stores/category';
+//渲染一级导航数据
+const categoryStore = useCategoryStore()
+</script>
+
+<template>
+    <header class='app-header'>
+        <div class="container">
+            <h1 class="logo">
+                <RouterLink to="/">小兔鲜</RouterLink>
+            </h1>
+            <ul class="app-header-nav">
+                <li class="home" v-for="item in categoryStore.categoryList" :key="item.id">
+                    <RouterLink to="/">{{ item.name }}</RouterLink>
+                </li>
+            </ul>
+            <div class="search">
+                <i class="iconfont icon-search"></i>
+                <input type="text" placeholder="搜一搜">
+            </div>
+            <!-- 头部购物车 -->
+
+        </div>
+    </header>
+</template>
+
+
+<style scoped lang='scss'>
+.app-header {
+    background: #fff;
+
+    .container {
+        display: flex;
+        align-items: center;
+    }
+
+    .logo {
+        width: 200px;
+
+        a {
+            display: block;
+            height: 132px;
+            width: 100%;
+            text-indent: -9999px;
+            background: url('@/assets/images/logo.png') no-repeat center 18px / contain;
+        }
+    }
+
+    .app-header-nav {
+        width: 820px;
+        display: flex;
+        padding-left: 40px;
+        position: relative;
+        z-index: 998;
+
+        li {
+            margin-right: 40px;
+            width: 38px;
+            text-align: center;
+
+            a {
+                font-size: 16px;
+                line-height: 32px;
+                height: 32px;
+                display: inline-block;
+
+                &:hover {
+                    color: $xtxColor;
+                    border-bottom: 1px solid $xtxColor;
+                }
+            }
+
+            .active {
+                color: $xtxColor;
+                border-bottom: 1px solid $xtxColor;
+            }
+        }
+    }
+
+    .search {
+        width: 170px;
+        height: 32px;
+        position: relative;
+        border-bottom: 1px solid #e7e7e7;
+        line-height: 32px;
+
+        .icon-search {
+            font-size: 18px;
+            margin-left: 5px;
+        }
+
+        input {
+            width: 140px;
+            padding-left: 5px;
+            color: #666;
+        }
+    }
+
+    .cart {
+        width: 50px;
+
+        .curr {
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            position: relative;
+            display: block;
+
+            .icon-cart {
+                font-size: 22px;
+            }
+
+            em {
+                font-style: normal;
+                position: absolute;
+                right: 0;
+                top: 0;
+                padding: 1px 6px;
+                line-height: 1;
+                background: $helpColor;
+                color: #fff;
+                font-size: 12px;
+                border-radius: 10px;
+                font-family: Arial;
+            }
+        }
+    }
+}
+</style>
+```
+
+### 分类导航实现
+
+```JavaScript
+<script setup>
+import { useCategoryStore } from '@/stores/category'
+const categoryStore = useCategoryStore()
+</script>
+
+<template>
+    <div class="home-category">
+        <ul class="menu">
+            <li v-for="item in categoryStore.categoryList" :key="item">
+                <RouterLink to="/">{{item.name}}</RouterLink>
+                <RouterLink v-for="i in item.children.slice(0,2)" :key="i" to="/">{{i.name}}</RouterLink>
+                <!-- 弹层layer位置 -->
+                <div class="layer">
+                    <h4>分类推荐 <small>根据您的购买或浏览记录推荐</small></h4>
+                    <ul>
+                        <li v-for="i in item.goods" :key="i.id">
+                            <RouterLink to="/">
+                                <img :src="i.picture" alt="" />
+                                <div class="info">
+                                    <p class="name ellipsis-2">
+                                        {{i.name}}
+                                    </p>
+                                    <p class="desc ellipsis">{{i.desc}}</p>
+                                    <p class="price"><i>¥</i>{{i.price}}</p>
+                                </div>
+                            </RouterLink>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+        </ul>
+    </div>
+</template>
+
+
+<style scoped lang='scss'>
+.home-category {
+    width: 250px;
+    height: 500px;
+    background: rgba(0, 0, 0, 0.8);
+    position: relative;
+    z-index: 99;
+
+    .menu {
+        li {
+            padding-left: 40px;
+            height: 55px;
+            line-height: 55px;
+
+            &:hover {
+                background: $xtxColor;
+            }
+
+            a {
+                margin-right: 4px;
+                color: #fff;
+
+                &:first-child {
+                    font-size: 16px;
+                }
+            }
+
+            .layer {
+                width: 990px;
+                height: 500px;
+                background: rgba(255, 255, 255, 0.8);
+                position: absolute;
+                left: 250px;
+                top: 0;
+                display: none;
+                padding: 0 15px;
+
+                h4 {
+                    font-size: 20px;
+                    font-weight: normal;
+                    line-height: 80px;
+
+                    small {
+                        font-size: 16px;
+                        color: #666;
+                    }
+                }
+
+                ul {
+                    display: flex;
+                    flex-wrap: wrap;
+
+                    li {
+                        width: 310px;
+                        height: 120px;
+                        margin-right: 15px;
+                        margin-bottom: 15px;
+                        border: 1px solid #eee;
+                        border-radius: 4px;
+                        background: #fff;
+
+                        &:nth-child(3n) {
+                            margin-right: 0;
+                        }
+
+                        a {
+                            display: flex;
+                            width: 100%;
+                            height: 100%;
+                            align-items: center;
+                            padding: 10px;
+
+                            &:hover {
+                                background: #e3f9f4;
+                            }
+
+                            img {
+                                width: 95px;
+                                height: 95px;
+                            }
+
+                            .info {
+                                padding-left: 10px;
+                                line-height: 24px;
+                                overflow: hidden;
+
+                                .name {
+                                    font-size: 16px;
+                                    color: #666;
+                                }
+
+                                .desc {
+                                    color: #999;
+                                }
+
+                                .price {
+                                    font-size: 22px;
+                                    color: $priceColor;
+
+                                    i {
+                                        font-size: 16px;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 关键样式  hover状态下的layer盒子变成block
+            &:hover {
+                .layer {
+                    display: block;
+                }
+            }
+        }
+    }
+}
+</style>
+```
+
+### 轮播图数据请求与渲染
+
+在pinia中设置请求
+
+```JavaScript
+import httpInstance from '@/utils/http'
+//获取Banner
+export function getBannerAPI() {
+    return httpInstance({
+        url:'/home/banner'
+    })
+}
+```
+
+在HomeBanner.vue中发起请求进行数据渲染
+
+```JavaScript
+<script setup>
+import { getBannerAPI } from '@/apis/home';
+import {ref,onMounted} from 'vue'
+
+const bannerList = ref([])
+const getBanner = async () => {
+    const res = await getBannerAPI()
+    bannerList.value = res.result
+}
+
+onMounted(() => {
+    getBanner()
+})
+</script>
+
+
+
+<template>
+    <div class="home-banner">
+        <el-carousel height="500px">
+            <el-carousel-item v-for="item in bannerList" :key="item.id">
+                <img :src="item.imgUrl"
+                    alt="">
+            </el-carousel-item>
+        </el-carousel>
+    </div>
+</template>
+
+
+
+<style scoped lang='scss'>
+.home-banner {
+    width: 1240px;
+    height: 500px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 98;
+
+    img {
+        width: 100%;
+        height: 500px;
+    }
+}
+</style>
+```
+
+### 面板组件封装
+
+纯展示类组件通用封装思路总结
+1.搭建纯静态的部分，不管可变的部分
+2.抽象可变的部分为组件参数
+非复杂的模版抽象成props，复杂的结构模版抽象为插槽
+
+#### 设置请求接口
+
+home.js
+
+```JavaScript
+import httpInstance from '@/utils/http'
+//获取Banner
+export function getBannerAPI() {
+    return httpInstance({
+        url:'/home/banner'
+    })
+}
+
+/**
+ * @description: 获取新鲜好物
+ * @param {*}
+ * @return {*}
+ */
+export const findNewAPI = () => {
+  return httpInstance({
+    url:'/home/new'
+  })
+}
+```
+
+封装HomePannel组件
+
+```JavaScript
+<script setup>
+//定义props
+defineProps({
+    // 主标题
+    title: {
+        type: String
+    },
+    // 副标题
+    subTitle: {
+        type: String
+    }
+})
+</script>
+
+
+<template>
+    <div class="home-panel">
+        <div class="container">
+            <div class="head">
+                <!-- 主标题和副标题 -->
+                <h3>
+                    {{title}}<small>{{subTitle}}</small>
+                </h3>
+            </div>
+            <!-- 主体内容区域 -->
+            <slot />
+        </div>
+    </div>
+</template>
+
+<style scoped lang='scss'>
+.home-panel {
+    background-color: #fff;
+
+    .head {
+        padding: 40px 0;
+        display: flex;
+        align-items: flex-end;
+
+        h3 {
+            flex: 1;
+            font-size: 32px;
+            font-weight: normal;
+            margin-left: 6px;
+            height: 35px;
+            line-height: 35px;
+
+            small {
+                font-size: 16px;
+                color: #999;
+                margin-left: 20px;
+            }
+        }
+    }
+}
+</style>
+```
+
+在HomeNew组应用
+
+```JavaScript
+<script setup>
+import HomePanel from './HomePanel.vue'
+import { findNewAPI } from '@/apis/home';
+import { ref, onMounted } from 'vue'
+// 获取数据
+const newList = ref([])
+
+const getNewList = async () => {
+    const res = await findNewAPI()
+    newList.value = res.result
+}
+
+onMounted(() => {
+    getNewList()
+})
+</script>
+
+<template>
+    <HomePanel title="新鲜好物" subTitle="新鲜出炉 品质靠谱">
+        <!-- 下面是插槽主体内容模版 -->
+        <ul class="goods-list">
+            <li v-for="item in newList" :key="item.id">
+                <RouterLink to="/">
+                    <img :src="item.picture" alt="" />
+                    <p class="name">{{ item.name }}</p>
+                    <p class="price">&yen;{{ item.price }}</p>
+                </RouterLink>
+            </li>
+        </ul>
+    </HomePanel>
+</template>
+
+
+<style scoped lang='scss'>
+.goods-list {
+    display: flex;
+    justify-content: space-between;
+    height: 406px;
+
+    li {
+        width: 306px;
+        height: 406px;
+
+        background: #f0f9f4;
+        transition: all .5s;
+
+        &:hover {
+            transform: translate3d(0, -3px, 0);
+            box-shadow: 0 3px 8px rgb(0 0 0 / 20%);
+        }
+
+        img {
+            width: 306px;
+            height: 306px;
+        }
+
+        p {
+            font-size: 22px;
+            padding-top: 12px;
+            text-align: center;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .price {
+            color: $priceColor;
+        }
+    }
+}
+</style>
+```
+
+### 图片懒加载指令实现
+
+在directives中新建index.js文件
+
+```JavaScript
+import { useIntersectionObserver } from "@vueuse/core";
+// 定义懒加载插件
+export const lazyPlugin = {
+    install(app) {
+        // 懒加载指令逻辑
+        app.directive("img-lazy", {
+          mounted(el, binding) {
+            // el:指令绑定的那个元素 img
+            // binding: binging.value 指令等于后面绑定的表达式的值 图片url
+                const { stop } = useIntersectionObserver(el, ([{ isIntersecting }]) => {
+              if (isIntersecting) {
+                // 进入视口区域
+                  el.src = binding.value;
+                  stop()
+              }
+            });
+          },
+        });
+    }
+}
+```
+
+在main.js中注册指令使用插件
+
+```JavaScript
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+
+import App from './App.vue'
+import router from './router'
+
+// 引入初始化样式文件
+import '@/styles/common.scss'
+
+// 引入懒加载指令插件并注册
+import {lazyPlugin} from '@/directives'
+const app = createApp(App)
+
+app.use(createPinia())
+app.use(router)
+app.use(lazyPlugin)
+app.mount('#app')
+
+```
+
+具体使用`<img v-img-lazy="item.picture" alt="" />`
+
+### Product产品列表实现
+
+HomeProduct.vue
+
+```JavaScript
+<script setup>
+import HomePanel from './HomePanel.vue'
+import { getGoodsAPI } from '@/apis/home';
+import { onMounted,ref } from 'vue';
+//获取数据列表
+const goodsProduct = ref([])
+const getGoods = async () => {
+    const res = await getGoodsAPI()
+    goodsProduct.value = res.result
+}
+onMounted(() => {
+    getGoods()
+})
+</script>
+
+<template>
+    <div class="home-product">
+        <HomePanel :title="cate.name" v-for="cate in goodsProduct" :key="cate.id">
+      <div class="box">
+        <RouterLink class="cover" to="/">
+          <img v-img-lazy="cate.picture" />
+          <strong class="label">
+            <span>{{ cate.name }}馆</span>
+            <span>{{ cate.saleInfo }}</span>
+          </strong>
+        </RouterLink>
+        <ul class="goods-list">
+          <li v-for="good in cate.goods" :key="good.id">
+            <RouterLink to="/" class="goods-item">
+              <img v-img-lazy="good.picture" alt="" />
+              <p class="name ellipsis">{{ good.name }}</p>
+              <p class="desc ellipsis">{{ good.desc }}</p>
+              <p class="price">&yen;{{ good.price }}</p>
+            </RouterLink>
+          </li>
+        </ul>
+      </div>
+    </HomePanel>
+    </div>
+</template>
+
+<style scoped lang='scss'>
+.home-product {
+    background: #fff;
+    margin-top: 20px;
+
+    .sub {
+        margin-bottom: 2px;
+
+        a {
+            padding: 2px 12px;
+            font-size: 16px;
+            border-radius: 4px;
+
+            &:hover {
+                background: $xtxColor;
+                color: #fff;
+            }
+
+            &:last-child {
+                margin-right: 80px;
+            }
+        }
+    }
+
+    .box {
+        display: flex;
+
+        .cover {
+            width: 240px;
+            height: 610px;
+            margin-right: 10px;
+            position: relative;
+
+            img {
+                width: 100%;
+                height: 100%;
+            }
+
+            .label {
+                width: 188px;
+                height: 66px;
+                display: flex;
+                font-size: 18px;
+                color: #fff;
+                line-height: 66px;
+                font-weight: normal;
+                position: absolute;
+                left: 0;
+                top: 50%;
+                transform: translate3d(0, -50%, 0);
+
+                span {
+                    text-align: center;
+
+                    &:first-child {
+                        width: 76px;
+                        background: rgba(0, 0, 0, 0.9);
+                    }
+
+                    &:last-child {
+                        flex: 1;
+                        background: rgba(0, 0, 0, 0.7);
+                    }
+                }
+            }
+        }
+
+        .goods-list {
+            width: 990px;
+            display: flex;
+            flex-wrap: wrap;
+
+            li {
+                width: 240px;
+                height: 300px;
+                margin-right: 10px;
+                margin-bottom: 10px;
+
+                &:nth-last-child(-n + 4) {
+                    margin-bottom: 0;
+                }
+
+                &:nth-child(4n) {
+                    margin-right: 0;
+                }
+            }
+        }
+
+        .goods-item {
+            display: block;
+            width: 220px;
+            padding: 20px 30px;
+            text-align: center;
+            transition: all .5s;
+
+            &:hover {
+                transform: translate3d(0, -3px, 0);
+                box-shadow: 0 3px 8px rgb(0 0 0 / 20%);
+            }
+
+            img {
+                width: 160px;
+                height: 160px;
+            }
+
+            p {
+                padding-top: 10px;
+            }
+
+            .name {
+                font-size: 16px;
+            }
+
+            .desc {
+                color: #999;
+                height: 29px;
+            }
+
+            .price {
+                color: $priceColor;
+                font-size: 20px;
+            }
+        }
+    }
+}
+</style>
+```
+
+添加接口`apis/home.js`
+
+```JavaScript
+import httpInstance from '@/utils/http'
+//获取Banner
+export function getBannerAPI() {
+    return httpInstance({
+        url:'/home/banner'
+    })
+}
+
+/**
+ * @description: 获取新鲜好物
+ * @param {*}
+ * @return {*}
+ */
+export const findNewAPI = () => {
+  return httpInstance({
+    url:'/home/new'
+  })
+}
+
+/**
+ * @description: 获取人气推荐
+ * @param {*}
+ * @return {*}
+ */
+export const getHotAPI = () => {
+    return httpInstance({
+      url: "/home/hot",
+    });
+}
+
+/**
+ * @description: 获取所有商品模块
+ * @param {*}
+ * @return {*}
+ */
+export const getGoodsAPI = () => {
+  return httpInstance({
+    url: '/home/goods'
+  })
+}
+```
+
+### GoodsItem组件封装
+
+```JavaScript
+<script setup>
+  defineProps({
+    good: {
+      type: Object,
+      default:()=>{}
+    }
+  })
+  </script>
+  <template>
+  <RouterLink to="/" class="goods-item">
+  <img v-img-lazy="good.picture" alt="" />
+  <p class="name ellipsis">{{ good.name }}</p>
+  <p class="desc ellipsis">{{ good.desc }}</p>
+  <p class="price">&yen;{{ good.price }}</p>
+  </RouterLink>
+  </template>
+  <style lang="scss">
+  .goods-item {
+  display: block;
+  width: 220px;
+  padding: 20px 30px;
+  text-align: center;
+  transition: all .5s;
+
+  &:hover {
+    transform: translate3d(0, -3px, 0);
+    box-shadow: 0 3px 8px rgb(0 0 0 / 20%);
+  }
+
+  img {
+    width: 160px;
+    height: 160px;
+  }
+
+  p {
+    padding-top: 10px;
+  }
+
+  .name {
+    font-size: 16px;
+  }
+
+  .desc {
+    color: #999;
+    height: 29px;
+  }
+
+  .price {
+    color: $priceColor;
+    font-size: 20px;
+  }
+}
+</style>
+```
+
+### 面包屑导航实现
+
+Category/index.vue
+
+```JavaScript
+<script setup>
+import { getCategoryAPI } from '@/apis/category'
+import { ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
+// 获取数据
+const categoryData = ref({})
+const route = useRoute()
+const getCategory = async () => {
+    const res = await getCategoryAPI(route.params.id)
+    categoryData.value = res.result
+}
+watch(route, () => getCategory(), { immediate: true })
+</script>
+
+<template>
+    <div class="top-category">
+        <div class="container m-top-20">
+            <!-- 面包屑 -->
+            <div class="bread-container">
+                <el-breadcrumb separator=">">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <el-breadcrumb-item>{{ categoryData.name }}</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang="scss">
+.top-category {
+    h3 {
+        font-size: 28px;
+        color: #666;
+        font-weight: normal;
+        text-align: center;
+        line-height: 100px;
+    }
+
+    .sub-list {
+        margin-top: 20px;
+        background-color: #fff;
+
+        ul {
+            display: flex;
+            padding: 0 32px;
+            flex-wrap: wrap;
+
+            li {
+                width: 168px;
+                height: 160px;
+
+
+                a {
+                    text-align: center;
+                    display: block;
+                    font-size: 16px;
+
+                    img {
+                        width: 100px;
+                        height: 100px;
+                    }
+
+                    p {
+                        line-height: 40px;
+                    }
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .ref-goods {
+        background-color: #fff;
+        margin-top: 20px;
+        position: relative;
+
+        .head {
+            .xtx-more {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+
+            .tag {
+                text-align: center;
+                color: #999;
+                font-size: 20px;
+                position: relative;
+                top: -20px;
+            }
+        }
+
+        .body {
+            display: flex;
+            justify-content: space-around;
+            padding: 0 40px 30px;
+        }
+    }
+
+    .bread-container {
+        padding: 25px 0;
+    }
+}
+</style>
+```
+
+### 轮播图逻辑迁移
+
+请求逻辑更改
+
+```JavaScript
+import httpInstance from '@/utils/http'
+//获取Banner
+export function getBannerAPI(params = {}) {
+  //默认为1 商品为2
+  const {distributionSite = '1'} = params
+    return httpInstance({
+      url: '/home/banner',
+      params: {
+        distributionSite
+      }
+    })
+}
+
+/**
+ * @description: 获取新鲜好物
+ * @param {*}
+ * @return {*}
+ */
+export const findNewAPI = () => {
+  return httpInstance({
+    url:'/home/new'
+  })
+}
+
+/**
+ * @description: 获取人气推荐
+ * @param {*}
+ * @return {*}
+ */
+export const getHotAPI = () => {
+    return httpInstance({
+      url: "/home/hot",
+    });
+}
+
+/**
+ * @description: 获取所有商品模块
+ * @param {*}
+ * @return {*}
+ */
+export const getGoodsAPI = () => {
+  return httpInstance({
+    url: '/home/goods'
+  })
+}
+```
+
+category/index.vue
+
+```JavaScript
+<script setup>
+import { getCategoryAPI } from '@/apis/category'
+import { ref, watch,onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { getBannerAPI } from '@/apis/home';
+// 获取数据
+const categoryData = ref({})
+const route = useRoute()
+const getCategory = async () => {
+    const res = await getCategoryAPI(route.params.id)
+    categoryData.value = res.result
+}
+watch(route, () => getCategory(), { immediate: true })
+
+//获取Banner
+const bannerList = ref([])
+const getBanner = async () => {
+    const res = await getBannerAPI({
+        distributionSite:'2'
+    })
+    bannerList.value = res.result
+}
+
+onMounted(() => {
+    getBanner()
+})
+</script>
+
+<template>
+    <div class="top-category">
+        <div class="container m-top-20">
+            <!-- 面包屑 -->
+            <div class="bread-container">
+                <el-breadcrumb separator=">">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <el-breadcrumb-item>{{ categoryData.name }}</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <!-- 轮播图 -->
+                <div class="home-banner">
+            <el-carousel height="500px">
+                <el-carousel-item v-for="item in bannerList" :key="item.id">
+                    <img :src="item.imgUrl"
+                        alt="">
+                </el-carousel-item>
+            </el-carousel>
+        </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang="scss">
+.top-category {
+    h3 {
+        font-size: 28px;
+        color: #666;
+        font-weight: normal;
+        text-align: center;
+        line-height: 100px;
+    }
+
+    .sub-list {
+        margin-top: 20px;
+        background-color: #fff;
+
+        ul {
+            display: flex;
+            padding: 0 32px;
+            flex-wrap: wrap;
+
+            li {
+                width: 168px;
+                height: 160px;
+
+
+                a {
+                    text-align: center;
+                    display: block;
+                    font-size: 16px;
+
+                    img {
+                        width: 100px;
+                        height: 100px;
+                    }
+
+                    p {
+                        line-height: 40px;
+                    }
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .ref-goods {
+        background-color: #fff;
+        margin-top: 20px;
+        position: relative;
+
+        .head {
+            .xtx-more {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+
+            .tag {
+                text-align: center;
+                color: #999;
+                font-size: 20px;
+                position: relative;
+                top: -20px;
+            }
+        }
+
+        .body {
+            display: flex;
+            justify-content: space-around;
+            padding: 0 40px 30px;
+        }
+    }
+
+    .bread-container {
+        padding: 25px 0;
+    }
+}
+.home-banner {
+    width: 1240px;
+    height: 500px;
+
+    img {
+        width: 100%;
+        height: 500px;
+    }
+}
+</style>
+```
+
+### 激活控制和分类列表渲染
+
+```JavaScript
+<RouterLink active-class="active" :to="`/category/${item.id}`">{{ item.name }}</RouterLink>
+```
+
+category/index.vue
+
+```JavaScript
+<script setup>
+import { getCategoryAPI } from '@/apis/category'
+import { ref, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { getBannerAPI } from '@/apis/home';
+import GoodsItem from '../Home/components/GoodsItem.vue'
+// 获取数据
+const categoryData = ref({})
+const route = useRoute()
+const getCategory = async () => {
+    const res = await getCategoryAPI(route.params.id)
+    categoryData.value = res.result
+}
+watch(route, () => getCategory(), { immediate: true })
+
+//获取Banner
+const bannerList = ref([])
+const getBanner = async () => {
+    const res = await getBannerAPI({
+        distributionSite: '2'
+    })
+    bannerList.value = res.result
+}
+
+onMounted(() => {
+    getBanner()
+})
+</script>
+
+<template>
+    <div class="top-category">
+        <div class="container m-top-20">
+            <!-- 面包屑 -->
+            <div class="bread-container">
+                <el-breadcrumb separator=">">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <el-breadcrumb-item>{{ categoryData.name }}</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <!-- 轮播图 -->
+            <div class="home-banner">
+                <el-carousel height="500px">
+                    <el-carousel-item v-for="item in bannerList" :key="item.id">
+                        <img :src="item.imgUrl" alt="">
+                    </el-carousel-item>
+                </el-carousel>
+            </div>
+            <div class="sub-list">
+                <h3>全部分类</h3>
+                <ul>
+                    <li v-for="i in categoryData.children" :key="i.id">
+                        <RouterLink to="/">
+                            <img :src="i.picture" />
+                            <p>{{ i.name }}</p>
+                        </RouterLink>
+                    </li>
+                </ul>
+            </div>
+            <div class="ref-goods" v-for="item in categoryData.children" :key="item.id">
+                <div class="head">
+                    <h3>- {{ item.name }}-</h3>
+                </div>
+                <div class="body">
+                    <GoodsItem v-for="good in item.goods" :goods="good" :key="good.id" />
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang="scss">
+.top-category {
+    h3 {
+        font-size: 28px;
+        color: #666;
+        font-weight: normal;
+        text-align: center;
+        line-height: 100px;
+    }
+
+    .sub-list {
+        margin-top: 20px;
+        background-color: #fff;
+
+        ul {
+            display: flex;
+            padding: 0 32px;
+            flex-wrap: wrap;
+
+            li {
+                width: 168px;
+                height: 160px;
+
+
+                a {
+                    text-align: center;
+                    display: block;
+                    font-size: 16px;
+
+                    img {
+                        width: 100px;
+                        height: 100px;
+                    }
+
+                    p {
+                        line-height: 40px;
+                    }
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .ref-goods {
+        background-color: #fff;
+        margin-top: 20px;
+        position: relative;
+
+        .head {
+            .xtx-more {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+
+            .tag {
+                text-align: center;
+                color: #999;
+                font-size: 20px;
+                position: relative;
+                top: -20px;
+            }
+        }
+
+        .body {
+            display: flex;
+            justify-content: space-around;
+            padding: 0 40px 30px;
+        }
+    }
+
+    .bread-container {
+        padding: 25px 0;
+    }
+}
+
+.home-banner {
+    width: 1240px;
+    height: 500px;
+
+    img {
+        width: 100%;
+        height: 500px;
+    }
+}
+</style>
+```
+
+### 解决路由缓存问题
+
+category/index.vue
+
+```JavaScript
+<script setup>
+import { getCategoryAPI } from '@/apis/category'
+import { ref, onMounted } from 'vue'
+import { useRoute ,onBeforeRouteUpdate} from 'vue-router'
+import { getBannerAPI } from '@/apis/home';
+import GoodsItem from '../Home/components/GoodsItem.vue'
+// 获取数据
+const categoryData = ref({})
+const route = useRoute()
+const getCategory = async (id = route.params.id) => {
+    const res = await getCategoryAPI(id)
+    categoryData.value = res.result
+}
+onMounted(()=>getCategory())
+//目标：路由参数变化的时候 可以把分类数据接口重新发送
+onBeforeRouteUpdate((to) => {
+    // 存在问题：使用最新的路由参数请求最新的分类数据
+    getCategory(to.params.id)
+})
+// watch(route, () => getCategory(), { immediate: true })
+
+//获取Banner
+const bannerList = ref([])
+const getBanner = async () => {
+    const res = await getBannerAPI({
+        distributionSite: '2'
+    })
+    bannerList.value = res.result
+}
+
+onMounted(() => {
+    getBanner()
+})
+</script>
+
+<template>
+    <div class="top-category">
+        <div class="container m-top-20">
+            <!-- 面包屑 -->
+            <div class="bread-container">
+                <el-breadcrumb separator=">">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <el-breadcrumb-item>{{ categoryData.name }}</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <!-- 轮播图 -->
+            <div class="home-banner">
+                <el-carousel height="500px">
+                    <el-carousel-item v-for="item in bannerList" :key="item.id">
+                        <img :src="item.imgUrl" alt="">
+                    </el-carousel-item>
+                </el-carousel>
+            </div>
+            <div class="sub-list">
+                <h3>全部分类</h3>
+                <ul>
+                    <li v-for="i in categoryData.children" :key="i.id">
+                        <RouterLink to="/">
+                            <img :src="i.picture" />
+                            <p>{{ i.name }}</p>
+                        </RouterLink>
+                    </li>
+                </ul>
+            </div>
+            <div class="ref-goods" v-for="item in categoryData.children" :key="item.id">
+                <div class="head">
+                    <h3>- {{ item.name }}-</h3>
+                </div>
+                <div class="body">
+                    <GoodsItem v-for="good in item.goods" :good="good" :key="good.id" />
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang="scss">
+.top-category {
+    h3 {
+        font-size: 28px;
+        color: #666;
+        font-weight: normal;
+        text-align: center;
+        line-height: 100px;
+    }
+
+    .sub-list {
+        margin-top: 20px;
+        background-color: #fff;
+
+        ul {
+            display: flex;
+            padding: 0 32px;
+            flex-wrap: wrap;
+
+            li {
+                width: 168px;
+                height: 160px;
+
+
+                a {
+                    text-align: center;
+                    display: block;
+                    font-size: 16px;
+
+                    img {
+                        width: 100px;
+                        height: 100px;
+                    }
+
+                    p {
+                        line-height: 40px;
+                    }
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .ref-goods {
+        background-color: #fff;
+        margin-top: 20px;
+        position: relative;
+
+        .head {
+            .xtx-more {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+
+            .tag {
+                text-align: center;
+                color: #999;
+                font-size: 20px;
+                position: relative;
+                top: -20px;
+            }
+        }
+
+        .body {
+            display: flex;
+            justify-content: space-around;
+            padding: 0 40px 30px;
+        }
+    }
+
+    .bread-container {
+        padding: 25px 0;
+    }
+}
+
+.home-banner {
+    width: 1240px;
+    height: 500px;
+
+    img {
+        width: 100%;
+        height: 500px;
+    }
+}
+</style>
+```
+
+### 使用逻辑函数拆分业务
+
+在view/category下新建composables文件夹，新建useBanner.js和useCategory.js文件
+useCategory.js
+
+```JavaScript
+// 封装分类数据业务相关业务代码
+import { getCategoryAPI } from "@/apis/category";
+import { ref, onMounted } from "vue";
+import { useRoute, onBeforeRouteUpdate } from "vue-router";
+export function useCategory() {
+  // 获取分类数据
+  const categoryData = ref({});
+  const route = useRoute();
+  const getCategory = async (id = route.params.id) => {
+    const res = await getCategoryAPI(id);
+    categoryData.value = res.result;
+  };
+  onMounted(() => getCategory());
+  //目标：路由参数变化的时候 可以把分类数据接口重新发送
+  onBeforeRouteUpdate((to) => {
+    // 存在问题：使用最新的路由参数请求最新的分类数据
+    getCategory(to.params.id);
+  });
+  // watch(route, () => getCategory(), { immediate: true })
+    return {
+        categoryData
+    }
+}
+
+```
+
+useBanner.js
+
+```JavaScript
+// 封装banner轮播图相关的业务代码
+import { ref, onMounted } from "vue";
+import { getBannerAPI } from "@/apis/home";
+export function useBanner() {
+  const bannerList = ref([]);
+  const getBanner = async () => {
+    const res = await getBannerAPI({
+      distributionSite: "2",
+    });
+    bannerList.value = res.result;
+  };
+
+  onMounted(() => {
+    getBanner();
+  });
+    return {
+        bannerList
+    }
+}
+```
+
+Category/index.vue
+
+```JavaScript
+<script setup>
+
+
+
+import GoodsItem from '../Home/components/GoodsItem.vue'
+import { useBanner } from './composables/useBanner'
+import { useCategory } from './composables/useCategory'
+const { bannerList } = useBanner()
+const { categoryData } = useCategory()
+
+
+</script>
+
+<template>
+    <div class="top-category">
+        <div class="container m-top-20">
+            <!-- 面包屑 -->
+            <div class="bread-container">
+                <el-breadcrumb separator=">">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <el-breadcrumb-item>{{ categoryData.name }}</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <!-- 轮播图 -->
+            <div class="home-banner">
+                <el-carousel height="500px">
+                    <el-carousel-item v-for="item in bannerList" :key="item.id">
+                        <img :src="item.imgUrl" alt="">
+                    </el-carousel-item>
+                </el-carousel>
+            </div>
+            <div class="sub-list">
+                <h3>全部分类</h3>
+                <ul>
+                    <li v-for="i in categoryData.children" :key="i.id">
+                        <RouterLink to="/">
+                            <img :src="i.picture" />
+                            <p>{{ i.name }}</p>
+                        </RouterLink>
+                    </li>
+                </ul>
+            </div>
+            <div class="ref-goods" v-for="item in categoryData.children" :key="item.id">
+                <div class="head">
+                    <h3>- {{ item.name }}-</h3>
+                </div>
+                <div class="body">
+                    <GoodsItem v-for="good in item.goods" :good="good" :key="good.id" />
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang="scss">
+.top-category {
+    h3 {
+        font-size: 28px;
+        color: #666;
+        font-weight: normal;
+        text-align: center;
+        line-height: 100px;
+    }
+
+    .sub-list {
+        margin-top: 20px;
+        background-color: #fff;
+
+        ul {
+            display: flex;
+            padding: 0 32px;
+            flex-wrap: wrap;
+
+            li {
+                width: 168px;
+                height: 160px;
+
+
+                a {
+                    text-align: center;
+                    display: block;
+                    font-size: 16px;
+
+                    img {
+                        width: 100px;
+                        height: 100px;
+                    }
+
+                    p {
+                        line-height: 40px;
+                    }
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .ref-goods {
+        background-color: #fff;
+        margin-top: 20px;
+        position: relative;
+
+        .head {
+            .xtx-more {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+
+            .tag {
+                text-align: center;
+                color: #999;
+                font-size: 20px;
+                position: relative;
+                top: -20px;
+            }
+        }
+
+        .body {
+            display: flex;
+            justify-content: space-around;
+            padding: 0 40px 30px;
+        }
+    }
+
+    .bread-container {
+        padding: 25px 0;
+    }
+}
+
+.home-banner {
+    width: 1240px;
+    height: 500px;
+
+    img {
+        width: 100%;
+        height: 500px;
+    }
+}
+</style>
+```
+
+### 二级分类路由配置
+
+views/SubCategory/index.vue
+
+```JavaScript
+<script setup>
+
+
+</script>
+
+<template>
+    <div class="container ">
+        <!-- 面包屑 -->
+        <div class="bread-container">
+            <el-breadcrumb separator=">">
+                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                <el-breadcrumb-item :to="{ path: '/' }">居家
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>居家生活用品</el-breadcrumb-item>
+            </el-breadcrumb>
+        </div>
+        <div class="sub-container">
+            <el-tabs>
+                <el-tab-pane label="最新商品" name="publishTime"></el-tab-pane>
+                <el-tab-pane label="最高人气" name="orderNum"></el-tab-pane>
+                <el-tab-pane label="评论最多" name="evaluateNum"></el-tab-pane>
+            </el-tabs>
+            <div class="body">
+                <!-- 商品列表-->
+            </div>
+        </div>
+    </div>
+</template>
+
+
+
+<style lang="scss" scoped>
+.bread-container {
+    padding: 25px 0;
+    color: #666;
+}
+
+.sub-container {
+    padding: 20px 10px;
+    background-color: #fff;
+
+    .body {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0 10px;
+    }
+
+    .goods-item {
+        display: block;
+        width: 220px;
+        margin-right: 20px;
+        padding: 20px 30px;
+        text-align: center;
+
+        img {
+            width: 160px;
+            height: 160px;
+        }
+
+        p {
+            padding-top: 10px;
+        }
+
+        .name {
+            font-size: 16px;
+        }
+
+        .desc {
+            color: #999;
+            height: 29px;
+        }
+
+        .price {
+            color: $priceColor;
+            font-size: 20px;
+        }
+    }
+
+    .pagination-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+
+}
+</style>
+```
+
+router/index.js
+
+```JavaScript
+// createRouter:创建router实例对象
+// createWebHistory:创建history模式的路由
+
+
+import { createRouter, createWebHistory } from "vue-router"
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  //path和component对应关系的位置
+  routes: [
+    {
+      path: "/",
+      component: () => import("@/views/Layout/index.vue"),
+      children: [
+        {
+          path: "",
+          component: () => import("@/views/Home/index.vue"),
+        },
+        {
+          path: "category/:id",
+          component: () => import("@/views/Category/index.vue"),
+        },
+        {
+          path: 'category/sub/:id',
+          component:() => import("@/views/SubCategory/index.vue")
+        }
+      ],
+    },
+    {
+      path: "/login",
+      component: () => import("@/views/Login/index.vue"),
+    },
+  ],
+});
+
+export default router;
+
+```
+
+Category/index.vue
+
+```JavaScript
+<script setup>
+
+
+
+import GoodsItem from '../Home/components/GoodsItem.vue'
+import { useBanner } from './composables/useBanner'
+import { useCategory } from './composables/useCategory'
+const { bannerList } = useBanner()
+const { categoryData } = useCategory()
+
+
+</script>
+
+<template>
+    <div class="top-category">
+        <div class="container m-top-20">
+            <!-- 面包屑 -->
+            <div class="bread-container">
+                <el-breadcrumb separator=">">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <el-breadcrumb-item>{{ categoryData.name }}</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <!-- 轮播图 -->
+            <div class="home-banner">
+                <el-carousel height="500px">
+                    <el-carousel-item v-for="item in bannerList" :key="item.id">
+                        <img :src="item.imgUrl" alt="">
+                    </el-carousel-item>
+                </el-carousel>
+            </div>
+            <div class="sub-list">
+                <h3>全部分类</h3>
+                <ul>
+                    <li v-for="i in categoryData.children" :key="i.id">
+                        <RouterLink :to="`/category/sub/${i.id}`">
+                            <img :src="i.picture" />
+                            <p>{{ i.name }}</p>
+                        </RouterLink>
+                    </li>
+                </ul>
+            </div>
+            <div class="ref-goods" v-for="item in categoryData.children" :key="item.id">
+                <div class="head">
+                    <h3>- {{ item.name }}-</h3>
+                </div>
+                <div class="body">
+                    <GoodsItem v-for="good in item.goods" :good="good" :key="good.id" />
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang="scss">
+.top-category {
+    h3 {
+        font-size: 28px;
+        color: #666;
+        font-weight: normal;
+        text-align: center;
+        line-height: 100px;
+    }
+
+    .sub-list {
+        margin-top: 20px;
+        background-color: #fff;
+
+        ul {
+            display: flex;
+            padding: 0 32px;
+            flex-wrap: wrap;
+
+            li {
+                width: 168px;
+                height: 160px;
+
+
+                a {
+                    text-align: center;
+                    display: block;
+                    font-size: 16px;
+
+                    img {
+                        width: 100px;
+                        height: 100px;
+                    }
+
+                    p {
+                        line-height: 40px;
+                    }
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .ref-goods {
+        background-color: #fff;
+        margin-top: 20px;
+        position: relative;
+
+        .head {
+            .xtx-more {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+            }
+
+            .tag {
+                text-align: center;
+                color: #999;
+                font-size: 20px;
+                position: relative;
+                top: -20px;
+            }
+        }
+
+        .body {
+            display: flex;
+            justify-content: space-around;
+            padding: 0 40px 30px;
+        }
+    }
+
+    .bread-container {
+        padding: 25px 0;
+    }
+}
+
+.home-banner {
+    width: 1240px;
+    height: 500px;
+
+    img {
+        width: 100%;
+        height: 500px;
+    }
+}
+</style>
+```
+
+### 面包屑导航实现
+
+apis/category.js
+
+```JavaScript
+import request from '@/utils/http'
+
+export function getCategoryAPI(id) {
+    return request({
+        url: '/category',
+        params: {
+            id
+        }
+    })
+}
+
+/**
+ * @description: 获取二级分类列表数据
+ * @param {*} id 分类id 
+ * @return {*}
+ */
+
+export const getCategoryFilterAPI = (id) => {
+  return request({
+    url:'/category/sub/filter',
+    params:{
+      id
+    }
+  })
+}
+
+```
+
+views/SubCategory/index.vue
+
+```JavaScript
+<script setup>
+import { getCategoryFilterAPI } from '@/apis/category'
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+//获取面包屑导航数据
+const categoryData = ref({})
+const route = useRoute()
+const getCategoryData = async () => {
+    const res = await getCategoryFilterAPI(route.params.id)
+    categoryData.value = res.result
+}
+onMounted(() => {
+    getCategoryData()
+})
+</script>
+
+<template>
+    <div class="container ">
+        <!-- 面包屑 -->
+        <div class="bread-container">
+            <el-breadcrumb separator=">">
+                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                <el-breadcrumb-item :to="{ path: `/category/${categoryData.parentId}` }">{{categoryData.parentName}}
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>{{categoryData.name}}</el-breadcrumb-item>
+            </el-breadcrumb>
+        </div>
+        <div class="sub-container">
+            <el-tabs>
+                <el-tab-pane label="最新商品" name="publishTime"></el-tab-pane>
+                <el-tab-pane label="最高人气" name="orderNum"></el-tab-pane>
+                <el-tab-pane label="评论最多" name="evaluateNum"></el-tab-pane>
+            </el-tabs>
+            <div class="body">
+                <!-- 商品列表-->
+            </div>
+        </div>
+    </div>
+</template>
+
+
+
+<style lang="scss" scoped>
+.bread-container {
+    padding: 25px 0;
+    color: #666;
+}
+
+.sub-container {
+    padding: 20px 10px;
+    background-color: #fff;
+
+    .body {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0 10px;
+    }
+
+    .goods-item {
+        display: block;
+        width: 220px;
+        margin-right: 20px;
+        padding: 20px 30px;
+        text-align: center;
+
+        img {
+            width: 160px;
+            height: 160px;
+        }
+
+        p {
+            padding-top: 10px;
+        }
+
+        .name {
+            font-size: 16px;
+        }
+
+        .desc {
+            color: #999;
+            height: 29px;
+        }
+
+        .price {
+            color: $priceColor;
+            font-size: 20px;
+        }
+    }
+
+    .pagination-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+
+}
+</style>
+```
+
+### 基础商品列表实现
+
+apis/category.js
+
+```JavaScript
+import request from '@/utils/http'
+
+export function getCategoryAPI(id) {
+    return request({
+        url: '/category',
+        params: {
+            id
+        }
+    })
+}
+
+/**
+ * @description: 获取二级分类列表数据
+ * @param {*} id 分类id 
+ * @return {*}
+ */
+
+export const getCategoryFilterAPI = (id) => {
+  return request({
+    url:'/category/sub/filter',
+    params:{
+      id
+    }
+  })
+}
+
+
+/**
+ * @description: 获取导航数据
+ * @data { 
+     categoryId: 1005000 ,
+     page: 1,
+     pageSize: 20,
+     sortField: 'publishTime' | 'orderNum' | 'evaluateNum'
+   } 
+ * @return {*}
+ */
+export const getSubCategoryAPI = (data) => {
+  return request({
+    url:'/category/goods/temporary',
+    method:'POST',
+    data
+  })
+}
+```
+
+SubCategory/index.vue
+
+```JavaScript
+<script setup>
+import { getCategoryFilterAPI } from '@/apis/category'
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { getSubCategoryAPI } from '@/apis/category'
+import GoodsItem from '../Home/components/GoodsItem.vue'
+//获取面包屑导航数据
+const categoryData = ref({})
+const route = useRoute()
+const getCategoryData = async () => {
+    const res = await getCategoryFilterAPI(route.params.id)
+    categoryData.value = res.result
+}
+onMounted(() => {
+    getCategoryData()
+})
+
+//获取基础列表数据渲染
+const goodList = ref([])
+const reqData = ref({
+    categoryId: route.params.id,
+    page: 1,
+    pageSize: 20,
+    sortField:'publishTime'
+})
+const getGoodList = async () => {
+    const res = await getSubCategoryAPI(reqData.value)
+    goodList.value = res.result.items
+}
+onMounted(()=>getGoodList())
+</script>
+
+<template>
+    <div class="container ">
+        <!-- 面包屑 -->
+        <div class="bread-container">
+            <el-breadcrumb separator=">">
+                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                <el-breadcrumb-item :to="{ path: `/category/${categoryData.parentId}` }">{{categoryData.parentName}}
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>{{categoryData.name}}</el-breadcrumb-item>
+            </el-breadcrumb>
+        </div>
+        <div class="sub-container">
+            <el-tabs>
+                <el-tab-pane label="最新商品" name="publishTime"></el-tab-pane>
+                <el-tab-pane label="最高人气" name="orderNum"></el-tab-pane>
+                <el-tab-pane label="评论最多" name="evaluateNum"></el-tab-pane>
+            </el-tabs>
+            <div class="body">
+                <!-- 商品列表-->
+                <GoodsItem v-for="goods in goodList" :good="goods" :key="goods.id"/>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+
+<style lang="scss" scoped>
+.bread-container {
+    padding: 25px 0;
+    color: #666;
+}
+
+.sub-container {
+    padding: 20px 10px;
+    background-color: #fff;
+
+    .body {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0 10px;
+    }
+
+    .goods-item {
+        display: block;
+        width: 220px;
+        margin-right: 20px;
+        padding: 20px 30px;
+        text-align: center;
+
+        img {
+            width: 160px;
+            height: 160px;
+        }
+
+        p {
+            padding-top: 10px;
+        }
+
+        .name {
+            font-size: 16px;
+        }
+
+        .desc {
+            color: #999;
+            height: 29px;
+        }
+
+        .price {
+            color: $priceColor;
+            font-size: 20px;
+        }
+    }
+
+    .pagination-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+
+}
+</style>
+```
+
+### 列表筛选功能实现
+
+SubCategory/index.vue
+
+```JavaScript
+<script setup>
+import { getCategoryFilterAPI } from '@/apis/category'
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { getSubCategoryAPI } from '@/apis/category'
+import GoodsItem from '../Home/components/GoodsItem.vue'
+//获取面包屑导航数据
+const categoryData = ref({})
+const route = useRoute()
+const getCategoryData = async () => {
+    const res = await getCategoryFilterAPI(route.params.id)
+    categoryData.value = res.result
+}
+onMounted(() => {
+    getCategoryData()
+})
+
+//获取基础列表数据渲染
+const goodList = ref([])
+const reqData = ref({
+    categoryId: route.params.id,
+    page: 1,
+    pageSize: 20,
+    sortField:'publishTime'
+})
+const getGoodList = async () => {
+    const res = await getSubCategoryAPI(reqData.value)
+    goodList.value = res.result.items
+}
+onMounted(() => getGoodList())
+
+//tab切换回调
+const tabChange = () => {
+    reqData.value.page = 1
+    getGoodList()
+}
+</script>
+
+<template>
+    <div class="container ">
+        <!-- 面包屑 -->
+        <div class="bread-container">
+            <el-breadcrumb separator=">">
+                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                <el-breadcrumb-item :to="{ path: `/category/${categoryData.parentId}` }">{{categoryData.parentName}}
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>{{categoryData.name}}</el-breadcrumb-item>
+            </el-breadcrumb>
+        </div>
+        <div class="sub-container">
+            <el-tabs v-model="reqData.sortField" @tab-change="tabChange">
+                <el-tab-pane label="最新商品" name="publishTime"></el-tab-pane>
+                <el-tab-pane label="最高人气" name="orderNum"></el-tab-pane>
+                <el-tab-pane label="评论最多" name="evaluateNum"></el-tab-pane>
+            </el-tabs>
+            <div class="body">
+                <!-- 商品列表-->
+                <GoodsItem v-for="goods in goodList" :good="goods" :key="goods.id"/>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+
+<style lang="scss" scoped>
+.bread-container {
+    padding: 25px 0;
+    color: #666;
+}
+
+.sub-container {
+    padding: 20px 10px;
+    background-color: #fff;
+
+    .body {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0 10px;
+    }
+
+    .goods-item {
+        display: block;
+        width: 220px;
+        margin-right: 20px;
+        padding: 20px 30px;
+        text-align: center;
+
+        img {
+            width: 160px;
+            height: 160px;
+        }
+
+        p {
+            padding-top: 10px;
+        }
+
+        .name {
+            font-size: 16px;
+        }
+
+        .desc {
+            color: #999;
+            height: 29px;
+        }
+
+        .price {
+            color: $priceColor;
+            font-size: 20px;
+        }
+    }
+
+    .pagination-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+
+}
+</style>
+```
+
+### 无限加载功能实现
+
+SubCategory/index.vue
+
+```JavaScript
+<script setup>
+import { getCategoryFilterAPI } from '@/apis/category'
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+import { getSubCategoryAPI } from '@/apis/category'
+import GoodsItem from '../Home/components/GoodsItem.vue'
+//获取面包屑导航数据
+const categoryData = ref({})
+const route = useRoute()
+const getCategoryData = async () => {
+    const res = await getCategoryFilterAPI(route.params.id)
+    categoryData.value = res.result
+}
+onMounted(() => {
+    getCategoryData()
+})
+
+//获取基础列表数据渲染
+const goodList = ref([])
+const reqData = ref({
+    categoryId: route.params.id,
+    page: 1,
+    pageSize: 20,
+    sortField:'publishTime'
+})
+const getGoodList = async () => {
+    const res = await getSubCategoryAPI(reqData.value)
+    goodList.value = res.result.items
+}
+onMounted(() => getGoodList())
+
+//tab切换回调
+const tabChange = () => {
+    reqData.value.page = 1
+    getGoodList()
+}
+
+//加载更多
+const disabled = ref(false)
+const load = async () => {
+    // 获取下一页数据
+    reqData.value.page++
+    const res = await getSubCategoryAPI(reqData.value)
+    goodList.value = [...goodList.value, ...res.result.items]
+    //加载完毕 停止监听
+    if (res.result.items.length === 0) {
+        disabled.value = true
+    }
+}
+</script>
+
+<template>
+    <div class="container ">
+        <!-- 面包屑 -->
+        <div class="bread-container">
+            <el-breadcrumb separator=">">
+                <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                <el-breadcrumb-item :to="{ path: `/category/${categoryData.parentId}` }">{{categoryData.parentName}}
+                </el-breadcrumb-item>
+                <el-breadcrumb-item>{{categoryData.name}}</el-breadcrumb-item>
+            </el-breadcrumb>
+        </div>
+        <div class="sub-container">
+            <el-tabs v-model="reqData.sortField" @tab-change="tabChange">
+                <el-tab-pane label="最新商品" name="publishTime"></el-tab-pane>
+                <el-tab-pane label="最高人气" name="orderNum"></el-tab-pane>
+                <el-tab-pane label="评论最多" name="evaluateNum"></el-tab-pane>
+            </el-tabs>
+            <div class="body" v-infinite-scroll="load" :infinite-scroll-disabled="disabled">
+                <!-- 商品列表-->
+                <GoodsItem v-for="goods in goodList" :good="goods" :key="goods.id"/>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+
+<style lang="scss" scoped>
+.bread-container {
+    padding: 25px 0;
+    color: #666;
+}
+
+.sub-container {
+    padding: 20px 10px;
+    background-color: #fff;
+
+    .body {
+        display: flex;
+        flex-wrap: wrap;
+        padding: 0 10px;
+    }
+
+    .goods-item {
+        display: block;
+        width: 220px;
+        margin-right: 20px;
+        padding: 20px 30px;
+        text-align: center;
+
+        img {
+            width: 160px;
+            height: 160px;
+        }
+
+        p {
+            padding-top: 10px;
+        }
+
+        .name {
+            font-size: 16px;
+        }
+
+        .desc {
+            color: #999;
+            height: 29px;
+        }
+
+        .price {
+            color: $priceColor;
+            font-size: 20px;
+        }
+    }
+
+    .pagination-container {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+    }
+
+
+}
+</style>
+```
+
+### 路由滚动行为优化
+
+router/index.js
+
+```JavaScript
+// createRouter:创建router实例对象
+// createWebHistory:创建history模式的路由
+
+
+import { createRouter, createWebHistory } from "vue-router"
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  //path和component对应关系的位置
+  routes: [
+    {
+      path: "/",
+      component: () => import("@/views/Layout/index.vue"),
+      children: [
+        {
+          path: "",
+          component: () => import("@/views/Home/index.vue"),
+        },
+        {
+          path: "category/:id",
+          component: () => import("@/views/Category/index.vue"),
+        },
+        {
+          path: 'category/sub/:id',
+          component:() => import("@/views/SubCategory/index.vue")
+        }
+      ],
+    },
+    {
+      path: "/login",
+      component: () => import("@/views/Login/index.vue"),
+    },
+  ],
+  scrollBehavior() {
+    return {
+      top:0
+    }
+  }
+});
+
+export default router;
+
+```
+
+### 详情页路由配置
+
+router/index.js
+
+```JavaScript
+// createRouter:创建router实例对象
+// createWebHistory:创建history模式的路由
+
+import { createRouter, createWebHistory } from "vue-router";
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  //path和component对应关系的位置
+  routes: [
+    {
+      path: "/",
+      component: () => import("@/views/Layout/index.vue"),
+      children: [
+        {
+          path: "",
+          component: () => import("@/views/Home/index.vue"),
+        },
+        {
+          path: "category/:id",
+          component: () => import("@/views/Category/index.vue"),
+        },
+        {
+          path: "category/sub/:id",
+          component: () => import("@/views/SubCategory/index.vue"),
+        },
+        {
+          path: "detail/:id",
+          component: () => import("@/views/Detail/index.vue"),
+        },
+      ],
+    },
+    {
+      path: "/login",
+      component: () => import("@/views/Login/index.vue"),
+    },
+  ],
+  scrollBehavior() {
+    return {
+      top: 0,
+    };
+  },
+});
+
+export default router;
+
+```
+
+views下新建Detail文件
+Detail/index.vue
+
+```JavaScript
+<script setup>
+
+
+</script>
+
+<template>
+    <div class="xtx-goods-page">
+        <div class="container">
+            <div class="bread-container">
+                <el-breadcrumb separator=">">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <el-breadcrumb-item :to="{ path: '/' }">母婴
+                    </el-breadcrumb-item>
+                    <el-breadcrumb-item :to="{ path: '/' }">跑步鞋
+                    </el-breadcrumb-item>
+                    <el-breadcrumb-item>抓绒保暖，毛毛虫子儿童运动鞋</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <!-- 商品信息 -->
+            <div class="info-container">
+                <div>
+                    <div class="goods-info">
+                        <div class="media">
+                            <!-- 图片预览区 -->
+
+                            <!-- 统计数量 -->
+                            <ul class="goods-sales">
+                                <li>
+                                    <p>销量人气</p>
+                                    <p> 100+ </p>
+                                    <p><i class="iconfont icon-task-filling"></i>销量人气</p>
+                                </li>
+                                <li>
+                                    <p>商品评价</p>
+                                    <p>200+</p>
+                                    <p><i class="iconfont icon-comment-filling"></i>查看评价</p>
+                                </li>
+                                <li>
+                                    <p>收藏人气</p>
+                                    <p>300+</p>
+                                    <p><i class="iconfont icon-favorite-filling"></i>收藏商品</p>
+                                </li>
+                                <li>
+                                    <p>品牌信息</p>
+                                    <p>400+</p>
+                                    <p><i class="iconfont icon-dynamic-filling"></i>品牌主页</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="spec">
+                            <!-- 商品信息区 -->
+                            <p class="g-name"> 抓绒保暖，毛毛虫儿童鞋 </p>
+                            <p class="g-desc">好穿 </p>
+                            <p class="g-price">
+                                <span>200</span>
+                                <span> 100</span>
+                            </p>
+                            <div class="g-service">
+                                <dl>
+                                    <dt>促销</dt>
+                                    <dd>12月好物放送，App领券购买直降120元</dd>
+                                </dl>
+                                <dl>
+                                    <dt>服务</dt>
+                                    <dd>
+                                        <span>无忧退货</span>
+                                        <span>快速退款</span>
+                                        <span>免费包邮</span>
+                                        <a href="javascript:;">了解详情</a>
+                                    </dd>
+                                </dl>
+                            </div>
+                            <!-- sku组件 -->
+
+                            <!-- 数据组件 -->
+
+                            <!-- 按钮组件 -->
+                            <div>
+                                <el-button size="large" class="btn">
+                                    加入购物车
+                                </el-button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="goods-footer">
+                        <div class="goods-article">
+                            <!-- 商品详情 -->
+                            <div class="goods-tabs">
+                                <nav>
+                                    <a>商品详情</a>
+                                </nav>
+                                <div class="goods-detail">
+                                    <!-- 属性 -->
+                                    <ul class="attrs">
+                                        <li v-for="item in 3" :key="item.value">
+                                            <span class="dt">白色</span>
+                                            <span class="dd">纯棉</span>
+                                        </li>
+                                    </ul>
+                                    <!-- 图片 -->
+
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 24热榜+专题推荐 -->
+                        <div class="goods-aside">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang='scss'>
+.xtx-goods-page {
+    .goods-info {
+        min-height: 600px;
+        background: #fff;
+        display: flex;
+
+        .media {
+            width: 580px;
+            height: 600px;
+            padding: 30px 50px;
+        }
+
+        .spec {
+            flex: 1;
+            padding: 30px 30px 30px 0;
+        }
+    }
+
+    .goods-footer {
+        display: flex;
+        margin-top: 20px;
+
+        .goods-article {
+            width: 940px;
+            margin-right: 20px;
+        }
+
+        .goods-aside {
+            width: 280px;
+            min-height: 1000px;
+        }
+    }
+
+    .goods-tabs {
+        min-height: 600px;
+        background: #fff;
+    }
+
+    .goods-warn {
+        min-height: 600px;
+        background: #fff;
+        margin-top: 20px;
+    }
+
+    .number-box {
+        display: flex;
+        align-items: center;
+
+        .label {
+            width: 60px;
+            color: #999;
+            padding-left: 10px;
+        }
+    }
+
+    .g-name {
+        font-size: 22px;
+    }
+
+    .g-desc {
+        color: #999;
+        margin-top: 10px;
+    }
+
+    .g-price {
+        margin-top: 10px;
+
+        span {
+            &::before {
+                content: "¥";
+                font-size: 14px;
+            }
+
+            &:first-child {
+                color: $priceColor;
+                margin-right: 10px;
+                font-size: 22px;
+            }
+
+            &:last-child {
+                color: #999;
+                text-decoration: line-through;
+                font-size: 16px;
+            }
+        }
+    }
+
+    .g-service {
+        background: #f5f5f5;
+        width: 500px;
+        padding: 20px 10px 0 10px;
+        margin-top: 10px;
+
+        dl {
+            padding-bottom: 20px;
+            display: flex;
+            align-items: center;
+
+            dt {
+                width: 50px;
+                color: #999;
+            }
+
+            dd {
+                color: #666;
+
+                &:last-child {
+                    span {
+                        margin-right: 10px;
+
+                        &::before {
+                            content: "•";
+                            color: $xtxColor;
+                            margin-right: 2px;
+                        }
+                    }
+
+                    a {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .goods-sales {
+        display: flex;
+        width: 400px;
+        align-items: center;
+        text-align: center;
+        height: 140px;
+
+        li {
+            flex: 1;
+            position: relative;
+
+            ~li::after {
+                position: absolute;
+                top: 10px;
+                left: 0;
+                height: 60px;
+                border-left: 1px solid #e4e4e4;
+                content: "";
+            }
+
+            p {
+                &:first-child {
+                    color: #999;
+                }
+
+                &:nth-child(2) {
+                    color: $priceColor;
+                    margin-top: 10px;
+                }
+
+                &:last-child {
+                    color: #666;
+                    margin-top: 10px;
+
+                    i {
+                        color: $xtxColor;
+                        font-size: 14px;
+                        margin-right: 2px;
+                    }
+
+                    &:hover {
+                        color: $xtxColor;
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.goods-tabs {
+    min-height: 600px;
+    background: #fff;
+
+    nav {
+        height: 70px;
+        line-height: 70px;
+        display: flex;
+        border-bottom: 1px solid #f5f5f5;
+
+        a {
+            padding: 0 40px;
+            font-size: 18px;
+            position: relative;
+
+            >span {
+                color: $priceColor;
+                font-size: 16px;
+                margin-left: 10px;
+            }
+        }
+    }
+}
+
+.goods-detail {
+    padding: 40px;
+
+    .attrs {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+
+        li {
+            display: flex;
+            margin-bottom: 10px;
+            width: 50%;
+
+            .dt {
+                width: 100px;
+                color: #999;
+            }
+
+            .dd {
+                flex: 1;
+                color: #666;
+            }
+        }
+    }
+
+    >img {
+        width: 100%;
+    }
+}
+
+.btn {
+    margin-top: 20px;
+
+}
+
+.bread-container {
+    padding: 25px 0;
+}
+</style>
+```
+
+### 详情页基础数据渲染
+
+封装接口
+
+```JavaScript
+import request from '@/utils/http'
+
+export const getDetail = (id) => {
+    return request({
+        url: '/goods',
+        params: {
+            id
+        }
+    })
+}
+```
+
+views/Detail/index.vue
+
+```JavaScript
+<script setup>
+import { getDetail } from '@/apis/detail'
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router'
+const goods = ref({})
+const route = useRoute()
+const getGoods = async () => {
+    const res = await getDetail(route.params.id)
+    goods.value = res.result
+    console.log(goods.value);
+}
+onMounted(() => {
+    getGoods()
+})
+
+</script>
+
+<template>
+    <div class="xtx-goods-page">
+        <div class="container">
+            <div class="bread-container">
+                <el-breadcrumb separator=">">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <!-- 错误原因：goods一开始{} {}.categories -> undefined -> undefined[1]
+                    1.可选链的语法?.
+                    2.v-if手动控制渲染时机 保证只有数据存在才渲染 -->
+                    <el-breadcrumb-item :to="{ path: `/category/${goods.categories?.[1].id}` }">{{goods.categories?.[1].name}}
+                    </el-breadcrumb-item>
+                    <el-breadcrumb-item :to="{ path: `/category/sub/${goods.categories?.[0].id}` }">{{ goods.categories?.[0].name}}
+                    </el-breadcrumb-item>
+                    <el-breadcrumb-item>抓绒保暖，毛毛虫子儿童运动鞋</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <!-- 商品信息 -->
+            <div class="info-container">
+                <div>
+                    <div class="goods-info">
+                        <div class="media">
+                            <!-- 图片预览区 -->
+
+                            <!-- 统计数量 -->
+                            <ul class="goods-sales">
+                                <li>
+                                    <p>销量人气</p>
+                                    <p> {{goods.salesCount}}+ </p>
+                                    <p><i class="iconfont icon-task-filling"></i>销量人气</p>
+                                </li>
+                                <li>
+                                    <p>商品评价</p>
+                                    <p>{{goods.commentCount}}+</p>
+                                    <p><i class="iconfont icon-comment-filling"></i>查看评价</p>
+                                </li>
+                                <li>
+                                    <p>收藏人气</p>
+                                    <p>{{goods.collectCount}}+</p>
+                                    <p><i class="iconfont icon-favorite-filling"></i>收藏商品</p>
+                                </li>
+                                <li>
+                                    <p>品牌信息</p>
+                                    <p>{{goods.brand?.name}}</p>
+                                    <p><i class="iconfont icon-dynamic-filling"></i>品牌主页</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="spec">
+                            <!-- 商品信息区 -->
+                            <p class="g-name"> {{goods.name}} </p>
+                            <p class="g-desc">{{goods.desc}} </p>
+                            <p class="g-price">
+                                <span>{{goods.oldPrice}}</span>
+                                <span> {{goods.price}}</span>
+                            </p>
+                            <div class="g-service">
+                                <dl>
+                                    <dt>促销</dt>
+                                    <dd>12月好物放送，App领券购买直降120元</dd>
+                                </dl>
+                                <dl>
+                                    <dt>服务</dt>
+                                    <dd>
+                                        <span>无忧退货</span>
+                                        <span>快速退款</span>
+                                        <span>免费包邮</span>
+                                        <a href="javascript:;">了解详情</a>
+                                    </dd>
+                                </dl>
+                            </div>
+                            <!-- sku组件 -->
+
+                            <!-- 数据组件 -->
+
+                            <!-- 按钮组件 -->
+                            <div>
+                                <el-button size="large" class="btn">
+                                    加入购物车
+                                </el-button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="goods-footer">
+                        <div class="goods-article">
+                            <!-- 商品详情 -->
+                            <div class="goods-tabs">
+                                <nav>
+                                    <a>商品详情</a>
+                                </nav>
+                                <div class="goods-detail">
+                                    <!-- 属性 -->
+                                    <ul class="attrs">
+                                        <li v-for="item in goods.details?.properties"  :key="item.value">
+                                            <span class="dt">{{item.name}}</span>
+                                            <span class="dd">{{item.value}}</span>
+                                        </li>
+                                    </ul>
+                                    <!-- 图片 -->
+                                    <img v-for="img in goods.details?.pictures" :src="img" :key="img" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 24热榜+专题推荐 -->
+                        <div class="goods-aside">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang='scss'>
+.xtx-goods-page {
+    .goods-info {
+        min-height: 600px;
+        background: #fff;
+        display: flex;
+
+        .media {
+            width: 580px;
+            height: 600px;
+            padding: 30px 50px;
+        }
+
+        .spec {
+            flex: 1;
+            padding: 30px 30px 30px 0;
+        }
+    }
+
+    .goods-footer {
+        display: flex;
+        margin-top: 20px;
+
+        .goods-article {
+            width: 940px;
+            margin-right: 20px;
+        }
+
+        .goods-aside {
+            width: 280px;
+            min-height: 1000px;
+        }
+    }
+
+    .goods-tabs {
+        min-height: 600px;
+        background: #fff;
+    }
+
+    .goods-warn {
+        min-height: 600px;
+        background: #fff;
+        margin-top: 20px;
+    }
+
+    .number-box {
+        display: flex;
+        align-items: center;
+
+        .label {
+            width: 60px;
+            color: #999;
+            padding-left: 10px;
+        }
+    }
+
+    .g-name {
+        font-size: 22px;
+    }
+
+    .g-desc {
+        color: #999;
+        margin-top: 10px;
+    }
+
+    .g-price {
+        margin-top: 10px;
+
+        span {
+            &::before {
+                content: "¥";
+                font-size: 14px;
+            }
+
+            &:first-child {
+                color: $priceColor;
+                margin-right: 10px;
+                font-size: 22px;
+            }
+
+            &:last-child {
+                color: #999;
+                text-decoration: line-through;
+                font-size: 16px;
+            }
+        }
+    }
+
+    .g-service {
+        background: #f5f5f5;
+        width: 500px;
+        padding: 20px 10px 0 10px;
+        margin-top: 10px;
+
+        dl {
+            padding-bottom: 20px;
+            display: flex;
+            align-items: center;
+
+            dt {
+                width: 50px;
+                color: #999;
+            }
+
+            dd {
+                color: #666;
+
+                &:last-child {
+                    span {
+                        margin-right: 10px;
+
+                        &::before {
+                            content: "•";
+                            color: $xtxColor;
+                            margin-right: 2px;
+                        }
+                    }
+
+                    a {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .goods-sales {
+        display: flex;
+        width: 400px;
+        align-items: center;
+        text-align: center;
+        height: 140px;
+
+        li {
+            flex: 1;
+            position: relative;
+
+            ~li::after {
+                position: absolute;
+                top: 10px;
+                left: 0;
+                height: 60px;
+                border-left: 1px solid #e4e4e4;
+                content: "";
+            }
+
+            p {
+                &:first-child {
+                    color: #999;
+                }
+
+                &:nth-child(2) {
+                    color: $priceColor;
+                    margin-top: 10px;
+                }
+
+                &:last-child {
+                    color: #666;
+                    margin-top: 10px;
+
+                    i {
+                        color: $xtxColor;
+                        font-size: 14px;
+                        margin-right: 2px;
+                    }
+
+                    &:hover {
+                        color: $xtxColor;
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.goods-tabs {
+    min-height: 600px;
+    background: #fff;
+
+    nav {
+        height: 70px;
+        line-height: 70px;
+        display: flex;
+        border-bottom: 1px solid #f5f5f5;
+
+        a {
+            padding: 0 40px;
+            font-size: 18px;
+            position: relative;
+
+            >span {
+                color: $priceColor;
+                font-size: 16px;
+                margin-left: 10px;
+            }
+        }
+    }
+}
+
+.goods-detail {
+    padding: 40px;
+
+    .attrs {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+
+        li {
+            display: flex;
+            margin-bottom: 10px;
+            width: 50%;
+
+            .dt {
+                width: 100px;
+                color: #999;
+            }
+
+            .dd {
+                flex: 1;
+                color: #666;
+            }
+        }
+    }
+
+    >img {
+        width: 100%;
+    }
+}
+
+.btn {
+    margin-top: 20px;
+
+}
+
+.bread-container {
+    padding: 25px 0;
+}
+</style>
+```
+
+### 热榜区基础组件封装和数据渲染
+
+```JavaScript
+import request from '@/utils/http'
+
+export const getDetail = (id) => {
+    return request({
+        url: '/goods',
+        params: {
+            id
+        }
+    })
+}
+
+/**
+ * 获取热榜商品
+ * @param {Number} id - 商品id
+ * @param {Number} type - 1代表24小时热销榜 2代表周热销榜
+ * @param {Number} limit - 获取个数
+ */
+export const fetchHotGoodsAPI = ({ id, type, limit = 3 }) => {
+  return request({
+    url:'/goods/hot',
+    params:{
+      id, 
+      type, 
+      limit
+    }
+  })
+}
+```
+
+views/Detail/components/DetailHot.vue
+
+```JavaScript
+<script setup>
+// 以24小时热榜获取数据渲染模板
+import { fetchHotGoodsAPI } from '@/apis/detail'
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router'
+// 1.封装接口
+// 2.调用接口渲染模板
+const hotList = ref([])
+const route = useRoute()
+const getHotList = async () => {
+    const res = await fetchHotGoodsAPI({
+        id: route.params.id,
+        type:1
+    })
+    hotList.value = res.result
+}
+onMounted(() => {
+    getHotList()
+})
+</script>
+
+
+<template>
+    <div class="goods-hot">
+        <h3>周日榜单</h3>
+        <!-- 商品区块 -->
+        <RouterLink to="/" class="goods-item" v-for="item in hotList" :key="item.id">
+            <img :src="item.picture" alt="" />
+            <p class="name ellipsis">{{item.name}}</p>
+            <p class="desc ellipsis">{{item.desc}}</p>
+            <p class="price">&yen;{{item.price}}0</p>
+        </RouterLink>
+    </div>
+</template>
+
+
+<style scoped lang="scss">
+.goods-hot {
+    h3 {
+        height: 70px;
+        background: $helpColor;
+        color: #fff;
+        font-size: 18px;
+        line-height: 70px;
+        padding-left: 25px;
+        margin-bottom: 10px;
+        font-weight: normal;
+    }
+
+    .goods-item {
+        display: block;
+        padding: 20px 30px;
+        text-align: center;
+        background: #fff;
+
+        img {
+            width: 160px;
+            height: 160px;
+        }
+
+        p {
+            padding-top: 10px;
+        }
+
+        .name {
+            font-size: 16px;
+        }
+
+        .desc {
+            color: #999;
+            height: 29px;
+        }
+
+        .price {
+            color: $priceColor;
+            font-size: 20px;
+        }
+    }
+}
+</style>
+```
+
+### 适配不同title和数据列表
+
+DetailHot.vue
+
+```JavaScript
+<script setup>
+// 以24小时热榜获取数据渲染模板
+import { fetchHotGoodsAPI } from '@/apis/detail'
+import { onMounted, ref ,computed} from 'vue';
+import { useRoute } from 'vue-router'
+
+// 设计props参数 适配不同的title和数据
+const props = defineProps({
+    hotType: {
+        type:Number
+    }
+})
+
+// 适配title 1 - 24小时热榜 2- 周热榜
+const TYPEMAP = {
+    1: '24小时热榜',
+    2:'周热榜'
+}
+const title = computed(() => TYPEMAP[props.hotType])
+// 1.封装接口
+// 2.调用接口渲染模板
+const hotList = ref([])
+const route = useRoute()
+const getHotList = async () => {
+    const res = await fetchHotGoodsAPI({
+        id: route.params.id,
+        type:props.hotType
+    })
+    hotList.value = res.result
+}
+onMounted(() => {
+    getHotList()
+})
+</script>
+
+
+<template>
+    <div class="goods-hot">
+        <h3>{{title}}</h3>
+        <!-- 商品区块 -->
+        <RouterLink to="/" class="goods-item" v-for="item in hotList" :key="item.id">
+            <img :src="item.picture" alt="" />
+            <p class="name ellipsis">{{item.name}}</p>
+            <p class="desc ellipsis">{{item.desc}}</p>
+            <p class="price">&yen;{{item.price}}0</p>
+        </RouterLink>
+    </div>
+</template>
+
+
+<style scoped lang="scss">
+.goods-hot {
+    h3 {
+        height: 70px;
+        background: $helpColor;
+        color: #fff;
+        font-size: 18px;
+        line-height: 70px;
+        padding-left: 25px;
+        margin-bottom: 10px;
+        font-weight: normal;
+    }
+
+    .goods-item {
+        display: block;
+        padding: 20px 30px;
+        text-align: center;
+        background: #fff;
+
+        img {
+            width: 160px;
+            height: 160px;
+        }
+
+        p {
+            padding-top: 10px;
+        }
+
+        .name {
+            font-size: 16px;
+        }
+
+        .desc {
+            color: #999;
+            height: 29px;
+        }
+
+        .price {
+            color: $priceColor;
+            font-size: 20px;
+        }
+    }
+}
+</style>
+```
+
+### 图片预览-小图切换大图显示
+
+components/ImageView/index.vue
+
+```JavaScript
+<script setup>
+import {ref} from 'vue'
+// 图片列表
+const imageList = [
+    "https://yanxuan-item.nosdn.127.net/d917c92e663c5ed0bb577c7ded73e4ec.png",
+    "https://yanxuan-item.nosdn.127.net/e801b9572f0b0c02a52952b01adab967.jpg",
+    "https://yanxuan-item.nosdn.127.net/b52c447ad472d51adbdde1a83f550ac2.jpg",
+    "https://yanxuan-item.nosdn.127.net/f93243224dc37674dfca5874fe089c60.jpg",
+    "https://yanxuan-item.nosdn.127.net/f881cfe7de9a576aaeea6ee0d1d24823.jpg"
+]
+//1.小图切换大图显示
+const activeIndex = ref(0)
+
+const enterhandler = (i) => {
+    activeIndex.value = i
+}
+</script>
+
+
+<template>
+    <div class="goods-image">
+        <!-- 左侧大图-->
+        <div class="middle" ref="target">
+            <img :src="imageList[activeIndex]" alt="" />
+            <!-- 蒙层小滑块 -->
+            <div class="layer" :style="{ left: `0px`, top: `0px` }"></div>
+        </div>
+        <!-- 小图列表 -->
+        <ul class="small">
+            <li v-for="(img, i) in imageList" :key="i" @mouseenter="enterhandler(i)" :class="{active:i === activeIndex}">
+                <img :src="img" alt="" />
+            </li>
+        </ul>
+        <!-- 放大镜大图 -->
+        <div class="large" :style="[
+            {
+                backgroundImage: `url(${imageList[0]})`,
+                backgroundPositionX: `0px`,
+                backgroundPositionY: `0px`,
+            },
+        ]" v-show="false"></div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.goods-image {
+    width: 480px;
+    height: 400px;
+    position: relative;
+    display: flex;
+
+    .middle {
+        width: 400px;
+        height: 400px;
+        background: #f5f5f5;
+    }
+
+    .large {
+        position: absolute;
+        top: 0;
+        left: 412px;
+        width: 400px;
+        height: 400px;
+        z-index: 500;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background-repeat: no-repeat;
+        // 背景图:盒子的大小 = 2:1  将来控制背景图的移动来实现放大的效果查看 background-position
+        background-size: 800px 800px;
+        background-color: #f8f8f8;
+    }
+
+    .layer {
+        width: 200px;
+        height: 200px;
+        background: rgba(0, 0, 0, 0.2);
+        // 绝对定位 然后跟随咱们鼠标控制left和top属性就可以让滑块移动起来
+        left: 0;
+        top: 0;
+        position: absolute;
+    }
+
+    .small {
+        width: 80px;
+
+        li {
+            width: 68px;
+            height: 68px;
+            margin-left: 12px;
+            margin-bottom: 15px;
+            cursor: pointer;
+
+            &:hover,
+            &.active {
+                border: 2px solid $xtxColor;
+            }
+        }
+    }
+}
+</style>
+```
+
+### 图片预览-放大镜
+
+components/ImageView/index.vue
+
+```JavaScript
+<script setup>
+import { ref, watch } from 'vue'
+import { useMouseInElement } from '@vueuse/core';
+// 图片列表
+const imageList = [
+    "https://yanxuan-item.nosdn.127.net/d917c92e663c5ed0bb577c7ded73e4ec.png",
+    "https://yanxuan-item.nosdn.127.net/e801b9572f0b0c02a52952b01adab967.jpg",
+    "https://yanxuan-item.nosdn.127.net/b52c447ad472d51adbdde1a83f550ac2.jpg",
+    "https://yanxuan-item.nosdn.127.net/f93243224dc37674dfca5874fe089c60.jpg",
+    "https://yanxuan-item.nosdn.127.net/f881cfe7de9a576aaeea6ee0d1d24823.jpg"
+]
+//1.小图切换大图显示
+const activeIndex = ref(0)
+
+const enterhandler = (i) => {
+    activeIndex.value = i
+}
+
+// 2.获取鼠标相对位置
+const target = ref(null)
+const { elementX, elementY, isOutside } = useMouseInElement(target)
+
+// 3.控制滑块跟随鼠标移动（监听elementX / Y变化，一旦变化 重新设置left / top）
+const left = ref(0)
+const top = ref(0)
+const positionX = ref(0)
+const positionY = ref(0)
+watch([elementX, elementY], () => {
+    // 如果鼠标没有移入盒子里面 直接不执行后面的逻辑
+    if(isOutside.value) return 
+    // 有效范围内控制滑块距离
+    // 横向
+    if (elementX.value > 100 && elementX.value < 300) {
+        left.value = elementX.value - 100
+    }
+    // 纵向
+    if (elementX.value > 100 && elementY.value < 300) {
+        top.value = elementY.value - 100
+    }
+    // 处理边界
+    if (elementX.value > 300) { left.value = 200 }
+    if (elementX.value < 100) { left.value = 0 }
+
+    if (elementY.value > 300) { top.value = 200 }
+    if (elementY.value < 100) { top.value = 0 }
+
+    // 控制大图的显示
+    positionX.value = -left.value *2
+    positionY.value = -top.value *2
+})
+</script>
+
+
+<template>
+    <div class="goods-image">
+        <!-- 左侧大图-->
+        <div class="middle" ref="target">
+            <img :src="imageList[activeIndex]" alt="" />
+            <!-- 蒙层小滑块 -->
+            <div class="layer" v-show="!isOutside" :style="{ left: `${left}px`, top: `${top}px` }"></div>
+        </div>
+        <!-- 小图列表 -->
+        <ul class="small">
+            <li v-for="(img, i) in imageList" :key="i" @mouseenter="enterhandler(i)" :class="{ active: i === activeIndex }">
+                <img :src="img" alt="" />
+            </li>
+        </ul>
+        <!-- 放大镜大图 -->
+        <div class="large" :style="[
+            {
+                backgroundImage: `url(${imageList[activeIndex]})`,
+                backgroundPositionX: `${positionX}px`,
+                backgroundPositionY: `${positionY}px`,
+            },
+        ]" v-show="!isOutside"></div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.goods-image {
+    width: 480px;
+    height: 400px;
+    position: relative;
+    display: flex;
+
+    .middle {
+        width: 400px;
+        height: 400px;
+        background: #f5f5f5;
+    }
+
+    .large {
+        position: absolute;
+        top: 0;
+        left: 412px;
+        width: 400px;
+        height: 400px;
+        z-index: 500;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background-repeat: no-repeat;
+        // 背景图:盒子的大小 = 2:1  将来控制背景图的移动来实现放大的效果查看 background-position
+        background-size: 800px 800px;
+        background-color: #f8f8f8;
+    }
+
+    .layer {
+        width: 200px;
+        height: 200px;
+        background: rgba(0, 0, 0, 0.2);
+        // 绝对定位 然后跟随咱们鼠标控制left和top属性就可以让滑块移动起来
+        left: 0;
+        top: 0;
+        position: absolute;
+    }
+
+    .small {
+        width: 80px;
+
+        li {
+            width: 68px;
+            height: 68px;
+            margin-left: 12px;
+            margin-bottom: 15px;
+            cursor: pointer;
+
+            &:hover,
+            &.active {
+                border: 2px solid $xtxColor;
+            }
+        }
+    }
+}
+</style>
+```
+
+### props适配图片列表
+
+components/ImageView/index.vue
+
+```JavaScript
+<script setup>
+import { ref, watch } from 'vue'
+import { useMouseInElement } from '@vueuse/core';
+// props适配图片列表
+defineProps({
+    imageList: {
+        type: Array,
+        default:() => []
+    }
+})
+//1.小图切换大图显示
+const activeIndex = ref(0)
+
+const enterhandler = (i) => {
+    activeIndex.value = i
+}
+
+// 2.获取鼠标相对位置
+const target = ref(null)
+const { elementX, elementY, isOutside } = useMouseInElement(target)
+
+// 3.控制滑块跟随鼠标移动（监听elementX / Y变化，一旦变化 重新设置left / top）
+const left = ref(0)
+const top = ref(0)
+const positionX = ref(0)
+const positionY = ref(0)
+watch([elementX, elementY], () => {
+    // 如果鼠标没有移入盒子里面 直接不执行后面的逻辑
+    if(isOutside.value) return 
+    // 有效范围内控制滑块距离
+    // 横向
+    if (elementX.value > 100 && elementX.value < 300) {
+        left.value = elementX.value - 100
+    }
+    // 纵向
+    if (elementX.value > 100 && elementY.value < 300) {
+        top.value = elementY.value - 100
+    }
+    // 处理边界
+    if (elementX.value > 300) { left.value = 200 }
+    if (elementX.value < 100) { left.value = 0 }
+
+    if (elementY.value > 300) { top.value = 200 }
+    if (elementY.value < 100) { top.value = 0 }
+
+    // 控制大图的显示
+    positionX.value = -left.value *2
+    positionY.value = -top.value *2
+})
+</script>
+
+
+<template>
+    <div class="goods-image">
+        <!-- 左侧大图-->
+        <div class="middle" ref="target">
+            <img :src="imageList[activeIndex]" alt="" />
+            <!-- 蒙层小滑块 -->
+            <div class="layer" v-show="!isOutside" :style="{ left: `${left}px`, top: `${top}px` }"></div>
+        </div>
+        <!-- 小图列表 -->
+        <ul class="small">
+            <li v-for="(img, i) in imageList" :key="i" @mouseenter="enterhandler(i)" :class="{ active: i === activeIndex }">
+                <img :src="img" alt="" />
+            </li>
+        </ul>
+        <!-- 放大镜大图 -->
+        <div class="large" :style="[
+            {
+                backgroundImage: `url(${imageList[activeIndex]})`,
+                backgroundPositionX: `${positionX}px`,
+                backgroundPositionY: `${positionY}px`,
+            },
+        ]" v-show="!isOutside"></div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.goods-image {
+    width: 480px;
+    height: 400px;
+    position: relative;
+    display: flex;
+
+    .middle {
+        width: 400px;
+        height: 400px;
+        background: #f5f5f5;
+    }
+
+    .large {
+        position: absolute;
+        top: 0;
+        left: 412px;
+        width: 400px;
+        height: 400px;
+        z-index: 500;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        background-repeat: no-repeat;
+        // 背景图:盒子的大小 = 2:1  将来控制背景图的移动来实现放大的效果查看 background-position
+        background-size: 800px 800px;
+        background-color: #f8f8f8;
+    }
+
+    .layer {
+        width: 200px;
+        height: 200px;
+        background: rgba(0, 0, 0, 0.2);
+        // 绝对定位 然后跟随咱们鼠标控制left和top属性就可以让滑块移动起来
+        left: 0;
+        top: 0;
+        position: absolute;
+    }
+
+    .small {
+        width: 80px;
+
+        li {
+            width: 68px;
+            height: 68px;
+            margin-left: 12px;
+            margin-bottom: 15px;
+            cursor: pointer;
+
+            &:hover,
+            &.active {
+                border: 2px solid $xtxColor;
+            }
+        }
+    }
+}
+</style>
+```
+
+### SKU组件
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685637981980-3f08d67b-22ef-406d-ac92-c311ff42b8bc.png#averageHue=%23f7f7f7&clientId=u8a75a16d-c7f0-4&from=paste&height=571&id=u3e2896a4&originHeight=714&originWidth=1563&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=243804&status=done&style=none&taskId=ud312e94e-70d3-49dd-9eaa-8a3fc5f433d&title=&width=1250.4)
+
+
+components/XtxSku/index.vue
+
+```JavaScript
+<template>
+  <div class="goods-sku">
+    <dl v-for="item in goods.specs" :key="item.id">
+      <dt>{{ item.name }}</dt>
+      <dd>
+        <template v-for="val in item.values" :key="val.name">
+          <img :class="{ selected: val.selected, disabled: val.disabled }" @click="clickSpecs(item, val)"
+            v-if="val.picture" :src="val.picture" />
+          <span :class="{ selected: val.selected, disabled: val.disabled }" @click="clickSpecs(item, val)" v-else>{{
+              val.name
+          }}</span>
+        </template>
+      </dd>
+    </dl>
+  </div>
+</template>
+<script>
+import { watchEffect } from 'vue'
+import getPowerSet from './power-set'
+const spliter = '★'
+// 根据skus数据得到路径字典对象
+const getPathMap = (skus) => {
+  const pathMap = {}
+  if (skus && skus.length > 0) {
+    skus.forEach(sku => {
+      // 1. 过滤出有库存有效的sku
+      if (sku.inventory) {
+        // 2. 得到sku属性值数组
+        const specs = sku.specs.map(spec => spec.valueName)
+        // 3. 得到sku属性值数组的子集
+        const powerSet = getPowerSet(specs)
+        // 4. 设置给路径字典对象
+        powerSet.forEach(set => {
+          const key = set.join(spliter)
+          // 如果没有就先初始化一个空数组
+          if (!pathMap[key]) {
+            pathMap[key] = []
+          }
+          pathMap[key].push(sku.id)
+        })
+      }
+    })
+  }
+  return pathMap
+}
+
+// 初始化禁用状态
+function initDisabledStatus (specs, pathMap) {
+  if (specs && specs.length > 0) {
+    specs.forEach(spec => {
+      spec.values.forEach(val => {
+        // 设置禁用状态
+        val.disabled = !pathMap[val.name]
+      })
+    })
+  }
+}
+
+// 得到当前选中规格集合
+const getSelectedArr = (specs) => {
+  const selectedArr = []
+  specs.forEach((spec, index) => {
+    const selectedVal = spec.values.find(val => val.selected)
+    if (selectedVal) {
+      selectedArr[index] = selectedVal.name
+    } else {
+      selectedArr[index] = undefined
+    }
+  })
+  return selectedArr
+}
+
+// 更新按钮的禁用状态
+const updateDisabledStatus = (specs, pathMap) => {
+  // 遍历每一种规格
+  specs.forEach((item, i) => {
+    // 拿到当前选择的项目
+    const selectedArr = getSelectedArr(specs)
+    // 遍历每一个按钮
+    item.values.forEach(val => {
+      if (!val.selected) {
+        selectedArr[i] = val.name
+        // 去掉undefined之后组合成key
+        const key = selectedArr.filter(value => value).join(spliter)
+        val.disabled = !pathMap[key]
+      }
+    })
+  })
+}
+
+
+export default {
+  name: 'XtxGoodSku',
+  props: {
+    // specs:所有的规格信息  skus:所有的sku组合
+    goods: {
+      type: Object,
+      default: () => ({ specs: [], skus: [] })
+    }
+  },
+  emits: ['change'],
+  setup (props, { emit }) {
+    let pathMap = {}
+    watchEffect(() => {
+      // 得到所有字典集合
+      pathMap = getPathMap(props.goods.skus)
+      // 组件初始化的时候更新禁用状态
+      initDisabledStatus(props.goods.specs, pathMap)
+    })
+
+    const clickSpecs = (item, val) => {
+      if (val.disabled) return false
+      // 选中与取消选中逻辑
+      if (val.selected) {
+        val.selected = false
+      } else {
+        item.values.forEach(bv => { bv.selected = false })
+        val.selected = true
+      }
+      // 点击之后再次更新选中状态
+      updateDisabledStatus(props.goods.specs, pathMap)
+      // 把选择的sku信息传出去给父组件
+      // 触发change事件将sku数据传递出去
+      const selectedArr = getSelectedArr(props.goods.specs).filter(value => value)
+      // 如果选中得规格数量和传入得规格总数相等则传出完整信息(都选择了)
+      // 否则传出空对象
+      if (selectedArr.length === props.goods.specs.length) {
+        // 从路径字典中得到skuId
+        const skuId = pathMap[selectedArr.join(spliter)][0]
+        const sku = props.goods.skus.find(sku => sku.id === skuId)
+        // 传递数据给父组件
+        emit('change', {
+          skuId: sku.id,
+          price: sku.price,
+          oldPrice: sku.oldPrice,
+          inventory: sku.inventory,
+          specsText: sku.specs.reduce((p, n) => `${p} ${n.name}：${n.valueName}`, '').trim()
+        })
+      } else {
+        emit('change', {})
+      }
+    }
+    return { clickSpecs }
+  }
+}
+</script>
+
+<style scoped lang="scss">
+@mixin sku-state-mixin {
+  border: 1px solid #e4e4e4;
+  margin-right: 10px;
+  cursor: pointer;
+
+  &.selected {
+    border-color: $xtxColor;
+  }
+
+  &.disabled {
+    opacity: 0.6;
+    border-style: dashed;
+    cursor: not-allowed;
+  }
+}
+
+.goods-sku {
+  padding-left: 10px;
+  padding-top: 20px;
+
+  dl {
+    display: flex;
+    padding-bottom: 20px;
+    align-items: center;
+
+    dt {
+      width: 50px;
+      color: #999;
+    }
+
+    dd {
+      flex: 1;
+      color: #666;
+
+      >img {
+        width: 50px;
+        height: 50px;
+        margin-bottom: 4px;
+        @include sku-state-mixin;
+      }
+
+      >span {
+        display: inline-block;
+        height: 30px;
+        line-height: 28px;
+        padding: 0 20px;
+        margin-bottom: 4px;
+        @include sku-state-mixin;
+      }
+    }
+  }
+}
+</style>
+```
+
+components/XtxSku/power-set.js
+
+```JavaScript
+
+export default function bwPowerSet (originalSet) {
+  const subSets = []
+
+  // We will have 2^n possible combinations (where n is a length of original set).
+  // It is because for every element of original set we will decide whether to include
+  // it or not (2 options for each set element).
+  const numberOfCombinations = 2 ** originalSet.length
+
+  // Each number in binary representation in a range from 0 to 2^n does exactly what we need:
+  // it shows by its bits (0 or 1) whether to include related element from the set or not.
+  // For example, for the set {1, 2, 3} the binary number of 0b010 would mean that we need to
+  // include only "2" to the current set.
+  for (let combinationIndex = 0; combinationIndex < numberOfCombinations; combinationIndex += 1) {
+    const subSet = []
+
+    for (let setElementIndex = 0; setElementIndex < originalSet.length; setElementIndex += 1) {
+      // Decide whether we need to include current element into the subset or not.
+      if (combinationIndex & (1 << setElementIndex)) {
+        subSet.push(originalSet[setElementIndex])
+      }
+    }
+
+    // Add current subset to the list of all subsets.
+    subSets.push(subSet)
+  }
+
+  return subSets
+}
+```
+
+Detail/index.vue
+
+```JavaScript
+<script setup>
+import DetailHot from './components/DetailHot.vue'
+import ImageView from '@/components/ImageView/index.vue'
+import XtxSku from '@/components/XtxSku/index.vue'
+import { getDetail } from '@/apis/detail'
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router'
+const goods = ref({})
+const route = useRoute()
+const getGoods = async () => {
+    const res = await getDetail(route.params.id)
+    goods.value = res.result
+}
+onMounted(() => {
+    getGoods()
+})
+//sku规格被操作时
+const skuChange = (sku) => {
+    console.log(sku);
+}
+</script>
+
+<template>
+    <div class="xtx-goods-page">
+        <div class="container">
+            <div class="bread-container">
+                <el-breadcrumb separator=">">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <!-- 错误原因：goods一开始{} {}.categories -> undefined -> undefined[1]
+                    1.可选链的语法?.
+                    2.v-if手动控制渲染时机 保证只有数据存在才渲染 -->
+                    <el-breadcrumb-item :to="{ path: `/category/${goods.categories?.[1].id}` }">{{goods.categories?.[1].name}}
+                    </el-breadcrumb-item>
+                    <el-breadcrumb-item :to="{ path: `/category/sub/${goods.categories?.[0].id}` }">{{ goods.categories?.[0].name}}
+                    </el-breadcrumb-item>
+                    <el-breadcrumb-item>抓绒保暖，毛毛虫子儿童运动鞋</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <!-- 商品信息 -->
+            <div class="info-container">
+                <div>
+                    <div class="goods-info">
+                        <div class="media">
+                            <!-- 图片预览区 -->
+                            <ImageView :image-list="goods.mainPictures"/>
+                            <!-- 统计数量 -->
+                            <ul class="goods-sales">
+                                <li>
+                                    <p>销量人气</p>
+                                    <p> {{goods.salesCount}}+ </p>
+                                    <p><i class="iconfont icon-task-filling"></i>销量人气</p>
+                                </li>
+                                <li>
+                                    <p>商品评价</p>
+                                    <p>{{goods.commentCount}}+</p>
+                                    <p><i class="iconfont icon-comment-filling"></i>查看评价</p>
+                                </li>
+                                <li>
+                                    <p>收藏人气</p>
+                                    <p>{{goods.collectCount}}+</p>
+                                    <p><i class="iconfont icon-favorite-filling"></i>收藏商品</p>
+                                </li>
+                                <li>
+                                    <p>品牌信息</p>
+                                    <p>{{goods.brand?.name}}</p>
+                                    <p><i class="iconfont icon-dynamic-filling"></i>品牌主页</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="spec">
+                            <!-- 商品信息区 -->
+                            <p class="g-name"> {{goods.name}} </p>
+                            <p class="g-desc">{{goods.desc}} </p>
+                            <p class="g-price">
+                                <span>{{goods.oldPrice}}</span>
+                                <span> {{goods.price}}</span>
+                            </p>
+                            <div class="g-service">
+                                <dl>
+                                    <dt>促销</dt>
+                                    <dd>12月好物放送，App领券购买直降120元</dd>
+                                </dl>
+                                <dl>
+                                    <dt>服务</dt>
+                                    <dd>
+                                        <span>无忧退货</span>
+                                        <span>快速退款</span>
+                                        <span>免费包邮</span>
+                                        <a href="javascript:;">了解详情</a>
+                                    </dd>
+                                </dl>
+                            </div>
+                            <!-- sku组件 -->
+                            <XtxSku :goods="goods" @change="skuChange"/>
+                            <!-- 数据组件 -->
+
+                            <!-- 按钮组件 -->
+                            <div>
+                                <el-button size="large" class="btn">
+                                    加入购物车
+                                </el-button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="goods-footer">
+                        <div class="goods-article">
+                            <!-- 商品详情 -->
+                            <div class="goods-tabs">
+                                <nav>
+                                    <a>商品详情</a>
+                                </nav>
+                                <div class="goods-detail">
+                                    <!-- 属性 -->
+                                    <ul class="attrs">
+                                        <li v-for="item in goods.details?.properties"  :key="item.value">
+                                            <span class="dt">{{item.name}}</span>
+                                            <span class="dd">{{item.value}}</span>
+                                        </li>
+                                    </ul>
+                                    <!-- 图片 -->
+                                    <img v-for="img in goods.details?.pictures" :src="img" :key="img" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 24热榜+专题推荐 -->
+                        <div class="goods-aside">
+                            <!-- 24小时 -->
+                            <DetailHot :hot-type="1"/>
+                            <!-- 周 -->
+                            <DetailHot :hot-type="2"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang='scss'>
+.xtx-goods-page {
+    .goods-info {
+        min-height: 600px;
+        background: #fff;
+        display: flex;
+
+        .media {
+            width: 580px;
+            height: 600px;
+            padding: 30px 50px;
+        }
+
+        .spec {
+            flex: 1;
+            padding: 30px 30px 30px 0;
+        }
+    }
+
+    .goods-footer {
+        display: flex;
+        margin-top: 20px;
+
+        .goods-article {
+            width: 940px;
+            margin-right: 20px;
+        }
+
+        .goods-aside {
+            width: 280px;
+            min-height: 1000px;
+        }
+    }
+
+    .goods-tabs {
+        min-height: 600px;
+        background: #fff;
+    }
+
+    .goods-warn {
+        min-height: 600px;
+        background: #fff;
+        margin-top: 20px;
+    }
+
+    .number-box {
+        display: flex;
+        align-items: center;
+
+        .label {
+            width: 60px;
+            color: #999;
+            padding-left: 10px;
+        }
+    }
+
+    .g-name {
+        font-size: 22px;
+    }
+
+    .g-desc {
+        color: #999;
+        margin-top: 10px;
+    }
+
+    .g-price {
+        margin-top: 10px;
+
+        span {
+            &::before {
+                content: "¥";
+                font-size: 14px;
+            }
+
+            &:first-child {
+                color: $priceColor;
+                margin-right: 10px;
+                font-size: 22px;
+            }
+
+            &:last-child {
+                color: #999;
+                text-decoration: line-through;
+                font-size: 16px;
+            }
+        }
+    }
+
+    .g-service {
+        background: #f5f5f5;
+        width: 500px;
+        padding: 20px 10px 0 10px;
+        margin-top: 10px;
+
+        dl {
+            padding-bottom: 20px;
+            display: flex;
+            align-items: center;
+
+            dt {
+                width: 50px;
+                color: #999;
+            }
+
+            dd {
+                color: #666;
+
+                &:last-child {
+                    span {
+                        margin-right: 10px;
+
+                        &::before {
+                            content: "•";
+                            color: $xtxColor;
+                            margin-right: 2px;
+                        }
+                    }
+
+                    a {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .goods-sales {
+        display: flex;
+        width: 400px;
+        align-items: center;
+        text-align: center;
+        height: 140px;
+
+        li {
+            flex: 1;
+            position: relative;
+
+            ~li::after {
+                position: absolute;
+                top: 10px;
+                left: 0;
+                height: 60px;
+                border-left: 1px solid #e4e4e4;
+                content: "";
+            }
+
+            p {
+                &:first-child {
+                    color: #999;
+                }
+
+                &:nth-child(2) {
+                    color: $priceColor;
+                    margin-top: 10px;
+                }
+
+                &:last-child {
+                    color: #666;
+                    margin-top: 10px;
+
+                    i {
+                        color: $xtxColor;
+                        font-size: 14px;
+                        margin-right: 2px;
+                    }
+
+                    &:hover {
+                        color: $xtxColor;
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.goods-tabs {
+    min-height: 600px;
+    background: #fff;
+
+    nav {
+        height: 70px;
+        line-height: 70px;
+        display: flex;
+        border-bottom: 1px solid #f5f5f5;
+
+        a {
+            padding: 0 40px;
+            font-size: 18px;
+            position: relative;
+
+            >span {
+                color: $priceColor;
+                font-size: 16px;
+                margin-left: 10px;
+            }
+        }
+    }
+}
+
+.goods-detail {
+    padding: 40px;
+
+    .attrs {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+
+        li {
+            display: flex;
+            margin-bottom: 10px;
+            width: 50%;
+
+            .dt {
+                width: 100px;
+                color: #999;
+            }
+
+            .dd {
+                flex: 1;
+                color: #666;
+            }
+        }
+    }
+
+    >img {
+        width: 100%;
+    }
+}
+
+.btn {
+    margin-top: 20px;
+
+}
+
+.bread-container {
+    padding: 25px 0;
+}
+</style>
+```
+
+### 通用组件统一注册全局
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685638966079-e2d6b7ec-6c83-469b-ace9-2dfdbd57cc3a.png#averageHue=%238e8473&clientId=u8a75a16d-c7f0-4&from=paste&height=526&id=u4afa2b6f&originHeight=657&originWidth=1599&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=170203&status=done&style=none&taskId=uee761c1b-650e-468b-b73a-b5e46e513e9&title=&width=1279.2)
+
+
+components/index.js
+
+```JavaScript
+// 把components中的所组件都进行全局化注册
+// 通过插件的方式
+import ImageView from "./ImageView/index.vue";
+import Sku from "./XtxSku/index.vue";
+export const componentPlugin = {
+  install(app) {
+    // app.component('组件名字'，组件配置对象)
+    app.component("XtxImageView", ImageView);
+    app.component("XtxSku", Sku);
+  },
+};
+
+```
+
+main.js
+
+```JavaScript
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+
+import App from "./App.vue";
+import router from "./router";
+
+// 引入初始化样式文件
+import "@/styles/common.scss";
+
+// 引入懒加载指令插件并注册
+import { lazyPlugin } from "@/directives";
+// 引入全局组件插件
+import { componentPlugin } from "@/components";
+
+const app = createApp(App);
+
+app.use(createPinia());
+app.use(router);
+app.use(lazyPlugin);
+app.use(componentPlugin);
+app.mount("#app");
+
+```
+
+### 登录页基础配置与校验
+
+views/Login/index.vue
+
+```JavaScript
+<script setup>
+import {ref} from 'vue'
+// 1.准备表单对象
+const form = ref({
+    account: '',
+    password:''
+})
+
+// 2.准备规则对象
+const rules = {
+    account: [
+        {
+            required:true,message:'用户名不能为空',trigger:'blur'
+        }
+    ],
+    password: [
+        {
+            required:true,message:'密码不能为空',trigger:'blur'
+        },
+        {
+            min:6,max:14,message:'密码长度为6-14个字符',trigger:'blur'
+        }
+    ]
+}
+</script>
+
+
+<template>
+  <div>
+    <header class="login-header">
+      <div class="container m-top-20">
+        <h1 class="logo">
+          <RouterLink to="/">小兔鲜</RouterLink>
+        </h1>
+        <RouterLink class="entry" to="/">
+          进入网站首页
+          <i class="iconfont icon-angle-right"></i>
+          <i class="iconfont icon-angle-right"></i>
+        </RouterLink>
+      </div>
+    </header>
+    <section class="login-section">
+      <div class="wrapper">
+        <nav>
+          <a href="javascript:;">账户登录</a>
+        </nav>
+        <div class="account-box">
+          <div class="form">
+            <el-form :rules="rules" :model="form" label-position="right" label-width="60px"
+              status-icon>
+              <el-form-item  prop="account" label="账户">
+                <el-input v-model="form.account"/>
+              </el-form-item>
+              <el-form-item prop="password" label="密码">
+                <el-input v-model="form.password"/>
+              </el-form-item>
+              <el-form-item label-width="22px">
+                <el-checkbox  size="large">
+                  我已同意隐私条款和服务条款
+                </el-checkbox>
+              </el-form-item>
+              <el-button size="large" class="subBtn">点击登录</el-button>
+            </el-form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="login-footer">
+      <div class="container">
+        <p>
+          <a href="javascript:;">关于我们</a>
+          <a href="javascript:;">帮助中心</a>
+          <a href="javascript:;">售后服务</a>
+          <a href="javascript:;">配送与验收</a>
+          <a href="javascript:;">商务合作</a>
+          <a href="javascript:;">搜索推荐</a>
+          <a href="javascript:;">友情链接</a>
+        </p>
+        <p>CopyRight &copy; 小兔鲜儿</p>
+      </div>
+    </footer>
+  </div>
+</template>
+
+<style scoped lang='scss'>
+.login-header {
+  background: #fff;
+  border-bottom: 1px solid #e4e4e4;
+
+  .container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .logo {
+    width: 200px;
+
+    a {
+      display: block;
+      height: 132px;
+      width: 100%;
+      text-indent: -9999px;
+      background: url("@/assets/images/logo.png") no-repeat center 18px / contain;
+    }
+  }
+
+  .sub {
+    flex: 1;
+    font-size: 24px;
+    font-weight: normal;
+    margin-bottom: 38px;
+    margin-left: 20px;
+    color: #666;
+  }
+
+  .entry {
+    width: 120px;
+    margin-bottom: 38px;
+    font-size: 16px;
+
+    i {
+      font-size: 14px;
+      color: $xtxColor;
+      letter-spacing: -5px;
+    }
+  }
+}
+
+.login-section {
+  background: url('@/assets/images/login-bg.png') no-repeat center / cover;
+  height: 488px;
+  position: relative;
+
+  .wrapper {
+    width: 380px;
+    background: #fff;
+    position: absolute;
+    left: 50%;
+    top: 54px;
+    transform: translate3d(100px, 0, 0);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+
+    nav {
+      font-size: 14px;
+      height: 55px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #f5f5f5;
+      display: flex;
+      padding: 0 40px;
+      text-align: right;
+      align-items: center;
+
+      a {
+        flex: 1;
+        line-height: 1;
+        display: inline-block;
+        font-size: 18px;
+        position: relative;
+        text-align: center;
+      }
+    }
+  }
+}
+
+.login-footer {
+  padding: 30px 0 50px;
+  background: #fff;
+
+  p {
+    text-align: center;
+    color: #999;
+    padding-top: 20px;
+
+    a {
+      line-height: 1;
+      padding: 0 10px;
+      color: #999;
+      display: inline-block;
+
+      ~a {
+        border-left: 1px solid #ccc;
+      }
+    }
+  }
+}
+
+.account-box {
+  .toggle {
+    padding: 15px 40px;
+    text-align: right;
+
+    a {
+      color: $xtxColor;
+
+      i {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .form {
+    padding: 0 20px 20px 20px;
+
+    &-item {
+      margin-bottom: 28px;
+
+      .input {
+        position: relative;
+        height: 36px;
+
+        >i {
+          width: 34px;
+          height: 34px;
+          background: #cfcdcd;
+          color: #fff;
+          position: absolute;
+          left: 1px;
+          top: 1px;
+          text-align: center;
+          line-height: 34px;
+          font-size: 18px;
+        }
+
+        input {
+          padding-left: 44px;
+          border: 1px solid #cfcdcd;
+          height: 36px;
+          line-height: 36px;
+          width: 100%;
+
+          &.error {
+            border-color: $priceColor;
+          }
+
+          &.active,
+          &:focus {
+            border-color: $xtxColor;
+          }
+        }
+
+        .code {
+          position: absolute;
+          right: 1px;
+          top: 1px;
+          text-align: center;
+          line-height: 34px;
+          font-size: 14px;
+          background: #f5f5f5;
+          color: #666;
+          width: 90px;
+          height: 34px;
+          cursor: pointer;
+        }
+      }
+
+      >.error {
+        position: absolute;
+        font-size: 12px;
+        line-height: 28px;
+        color: $priceColor;
+
+        i {
+          font-size: 14px;
+          margin-right: 2px;
+        }
+      }
+    }
+
+    .agree {
+      a {
+        color: #069;
+      }
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      height: 40px;
+      color: #fff;
+      text-align: center;
+      line-height: 40px;
+      background: $xtxColor;
+
+      &.disabled {
+        background: #cfcdcd;
+      }
+    }
+  }
+
+  .action {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .url {
+      a {
+        color: #999;
+        margin-left: 10px;
+      }
+    }
+  }
+}
+
+.subBtn {
+  background: $xtxColor;
+  width: 100%;
+  color: #fff;
+}
+</style>
+```
+
+### 自定义校验规则
+
+views/Login/index.vue
+
+```JavaScript
+<script setup>
+import {ref} from 'vue'
+// 1.准备表单对象
+const form = ref({
+    account: '',
+    password: '',
+    agree:true
+})
+
+// 2.准备规则对象
+const rules = {
+    account: [
+        {
+            required:true,message:'用户名不能为空',trigger:'blur'
+        }
+    ],
+    password: [
+        {
+            required:true,message:'密码不能为空',trigger:'blur'
+        },
+        {
+            min:6,max:14,message:'密码长度为6-14个字符',trigger:'blur'
+        }
+    ],
+    agree: [
+        {
+            validator: (rule, value, callback) => {
+                //自定义校验逻辑
+                //勾选就通过 不勾选就不通过
+                if (value) {
+                    callback()
+                } else {
+                    callback(new Error('请勾选协议'))
+                }
+            }
+        }
+    ]
+}
+</script>
+
+
+<template>
+  <div>
+    <header class="login-header">
+      <div class="container m-top-20">
+        <h1 class="logo">
+          <RouterLink to="/">小兔鲜</RouterLink>
+        </h1>
+        <RouterLink class="entry" to="/">
+          进入网站首页
+          <i class="iconfont icon-angle-right"></i>
+          <i class="iconfont icon-angle-right"></i>
+        </RouterLink>
+      </div>
+    </header>
+    <section class="login-section">
+      <div class="wrapper">
+        <nav>
+          <a href="javascript:;">账户登录</a>
+        </nav>
+        <div class="account-box">
+          <div class="form">
+            <el-form :rules="rules" :model="form" label-position="right" label-width="60px"
+              status-icon>
+              <el-form-item  prop="account" label="账户">
+                <el-input v-model="form.account"/>
+              </el-form-item>
+              <el-form-item prop="password" label="密码">
+                <el-input v-model="form.password"/>
+              </el-form-item>
+              <el-form-item prop="agree" label-width="22px">
+                <el-checkbox  size="large" v-model="form.agree">
+                  我已同意隐私条款和服务条款
+                </el-checkbox>
+              </el-form-item>
+              <el-button size="large" class="subBtn">点击登录</el-button>
+            </el-form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="login-footer">
+      <div class="container">
+        <p>
+          <a href="javascript:;">关于我们</a>
+          <a href="javascript:;">帮助中心</a>
+          <a href="javascript:;">售后服务</a>
+          <a href="javascript:;">配送与验收</a>
+          <a href="javascript:;">商务合作</a>
+          <a href="javascript:;">搜索推荐</a>
+          <a href="javascript:;">友情链接</a>
+        </p>
+        <p>CopyRight &copy; 小兔鲜儿</p>
+      </div>
+    </footer>
+  </div>
+</template>
+
+<style scoped lang='scss'>
+.login-header {
+  background: #fff;
+  border-bottom: 1px solid #e4e4e4;
+
+  .container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .logo {
+    width: 200px;
+
+    a {
+      display: block;
+      height: 132px;
+      width: 100%;
+      text-indent: -9999px;
+      background: url("@/assets/images/logo.png") no-repeat center 18px / contain;
+    }
+  }
+
+  .sub {
+    flex: 1;
+    font-size: 24px;
+    font-weight: normal;
+    margin-bottom: 38px;
+    margin-left: 20px;
+    color: #666;
+  }
+
+  .entry {
+    width: 120px;
+    margin-bottom: 38px;
+    font-size: 16px;
+
+    i {
+      font-size: 14px;
+      color: $xtxColor;
+      letter-spacing: -5px;
+    }
+  }
+}
+
+.login-section {
+  background: url('@/assets/images/login-bg.png') no-repeat center / cover;
+  height: 488px;
+  position: relative;
+
+  .wrapper {
+    width: 380px;
+    background: #fff;
+    position: absolute;
+    left: 50%;
+    top: 54px;
+    transform: translate3d(100px, 0, 0);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+
+    nav {
+      font-size: 14px;
+      height: 55px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #f5f5f5;
+      display: flex;
+      padding: 0 40px;
+      text-align: right;
+      align-items: center;
+
+      a {
+        flex: 1;
+        line-height: 1;
+        display: inline-block;
+        font-size: 18px;
+        position: relative;
+        text-align: center;
+      }
+    }
+  }
+}
+
+.login-footer {
+  padding: 30px 0 50px;
+  background: #fff;
+
+  p {
+    text-align: center;
+    color: #999;
+    padding-top: 20px;
+
+    a {
+      line-height: 1;
+      padding: 0 10px;
+      color: #999;
+      display: inline-block;
+
+      ~a {
+        border-left: 1px solid #ccc;
+      }
+    }
+  }
+}
+
+.account-box {
+  .toggle {
+    padding: 15px 40px;
+    text-align: right;
+
+    a {
+      color: $xtxColor;
+
+      i {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .form {
+    padding: 0 20px 20px 20px;
+
+    &-item {
+      margin-bottom: 28px;
+
+      .input {
+        position: relative;
+        height: 36px;
+
+        >i {
+          width: 34px;
+          height: 34px;
+          background: #cfcdcd;
+          color: #fff;
+          position: absolute;
+          left: 1px;
+          top: 1px;
+          text-align: center;
+          line-height: 34px;
+          font-size: 18px;
+        }
+
+        input {
+          padding-left: 44px;
+          border: 1px solid #cfcdcd;
+          height: 36px;
+          line-height: 36px;
+          width: 100%;
+
+          &.error {
+            border-color: $priceColor;
+          }
+
+          &.active,
+          &:focus {
+            border-color: $xtxColor;
+          }
+        }
+
+        .code {
+          position: absolute;
+          right: 1px;
+          top: 1px;
+          text-align: center;
+          line-height: 34px;
+          font-size: 14px;
+          background: #f5f5f5;
+          color: #666;
+          width: 90px;
+          height: 34px;
+          cursor: pointer;
+        }
+      }
+
+      >.error {
+        position: absolute;
+        font-size: 12px;
+        line-height: 28px;
+        color: $priceColor;
+
+        i {
+          font-size: 14px;
+          margin-right: 2px;
+        }
+      }
+    }
+
+    .agree {
+      a {
+        color: #069;
+      }
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      height: 40px;
+      color: #fff;
+      text-align: center;
+      line-height: 40px;
+      background: $xtxColor;
+
+      &.disabled {
+        background: #cfcdcd;
+      }
+    }
+  }
+
+  .action {
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .url {
+      a {
+        color: #999;
+        margin-left: 10px;
+      }
+    }
+  }
+}
+
+.subBtn {
+  background: $xtxColor;
+  width: 100%;
+  color: #fff;
+}
+</style>
+```
+
+### 登录基础功能实现
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685680567975-5644280b-ad48-42eb-84d8-d0477a2fa016.png#averageHue=%23d9d5cd&clientId=u2310c487-be9c-4&from=paste&height=316&id=u388b1116&originHeight=395&originWidth=806&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=318254&status=done&style=none&taskId=u728d7830-5b41-4002-bd79-d36a492dfeb&title=&width=644.8)
+
+
+apis/user.js
+
+```JavaScript
+//封装所有和用户相关的接口函数
+import request from "@/utils/http";
+
+export const loginAPI = ({account,password}) => {
+    return request({
+        url: '/login',
+        method: 'POST',
+        data: {
+            account,
+            password
+        }
+    })
+}   
+```
+
+views/Login/index.vue
+
+```JavaScript
+<script setup>
+import { ref } from 'vue'
+import { loginAPI } from '@/apis/user'
+import { ElMessage } from 'element-plus'
+import 'element-plus/theme-chalk/el-message.css'
+import { useRouter } from 'vue-router'
+// 1.准备表单对象
+const form = ref({
+    account: '',
+    password: '',
+    agree: true
+})
+
+// 2.准备规则对象
+const rules = {
+    account: [
+        {
+            required: true, message: '用户名不能为空', trigger: 'blur'
+        }
+    ],
+    password: [
+        {
+            required: true, message: '密码不能为空', trigger: 'blur'
+        },
+        {
+            min: 6, max: 14, message: '密码长度为6-14个字符', trigger: 'blur'
+        }
+    ],
+    agree: [
+        {
+            validator: (rule, value, callback) => {
+                //自定义校验逻辑
+                //勾选就通过 不勾选就不通过
+                if (value) {
+                    callback()
+                } else {
+                    callback(new Error('请勾选协议'))
+                }
+            }
+        }
+    ]
+}
+
+// 3.获取form实例做统一校验
+const formRef = ref(null)
+const router = useRouter()
+const doLogin = () => {
+    const {account,password} = form.value
+    // 调用实例方法
+    formRef.value.validate(async (valid) => {
+        //valid:所有表单都通过校验 才为true
+        // 以valid作为判断条件 如果通过校验才执行登录逻辑
+        if (valid) {
+            //TODO LOGIN
+            const res = await loginAPI({ account, password })
+            // 1.提示用户
+            ElMessage({ type: 'success', message: '登录成功' })
+            // 2.跳转首页
+            router.replace({path:'/'})
+        }
+    })
+}
+</script>
+
+
+<template>
+    <div>
+        <header class="login-header">
+            <div class="container m-top-20">
+                <h1 class="logo">
+                    <RouterLink to="/">小兔鲜</RouterLink>
+                </h1>
+                <RouterLink class="entry" to="/">
+                    进入网站首页
+                    <i class="iconfont icon-angle-right"></i>
+                    <i class="iconfont icon-angle-right"></i>
+                </RouterLink>
+            </div>
+        </header>
+        <section class="login-section">
+            <div class="wrapper">
+                <nav>
+                    <a href="javascript:;">账户登录</a>
+                </nav>
+                <div class="account-box">
+                    <div class="form">
+                        <el-form ref="formRef" :rules="rules" :model="form" label-position="right" label-width="60px"
+                            status-icon>
+                            <el-form-item prop="account" label="账户">
+                                <el-input v-model="form.account" />
+                            </el-form-item>
+                            <el-form-item prop="password" label="密码">
+                                <el-input v-model="form.password" />
+                            </el-form-item>
+                            <el-form-item prop="agree" label-width="22px">
+                                <el-checkbox size="large" v-model="form.agree">
+                                    我已同意隐私条款和服务条款
+                                </el-checkbox>
+                            </el-form-item>
+                            <el-button size="large" @click="doLogin" class="subBtn">点击登录</el-button>
+                        </el-form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="login-footer">
+            <div class="container">
+                <p>
+                    <a href="javascript:;">关于我们</a>
+                    <a href="javascript:;">帮助中心</a>
+                    <a href="javascript:;">售后服务</a>
+                    <a href="javascript:;">配送与验收</a>
+                    <a href="javascript:;">商务合作</a>
+                    <a href="javascript:;">搜索推荐</a>
+                    <a href="javascript:;">友情链接</a>
+                </p>
+                <p>CopyRight &copy; 小兔鲜儿</p>
+            </div>
+        </footer>
+    </div>
+</template>
+
+<style scoped lang='scss'>
+.login-header {
+    background: #fff;
+    border-bottom: 1px solid #e4e4e4;
+
+    .container {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+    }
+
+    .logo {
+        width: 200px;
+
+        a {
+            display: block;
+            height: 132px;
+            width: 100%;
+            text-indent: -9999px;
+            background: url("@/assets/images/logo.png") no-repeat center 18px / contain;
+        }
+    }
+
+    .sub {
+        flex: 1;
+        font-size: 24px;
+        font-weight: normal;
+        margin-bottom: 38px;
+        margin-left: 20px;
+        color: #666;
+    }
+
+    .entry {
+        width: 120px;
+        margin-bottom: 38px;
+        font-size: 16px;
+
+        i {
+            font-size: 14px;
+            color: $xtxColor;
+            letter-spacing: -5px;
+        }
+    }
+}
+
+.login-section {
+    background: url('@/assets/images/login-bg.png') no-repeat center / cover;
+    height: 488px;
+    position: relative;
+
+    .wrapper {
+        width: 380px;
+        background: #fff;
+        position: absolute;
+        left: 50%;
+        top: 54px;
+        transform: translate3d(100px, 0, 0);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+
+        nav {
+            font-size: 14px;
+            height: 55px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            padding: 0 40px;
+            text-align: right;
+            align-items: center;
+
+            a {
+                flex: 1;
+                line-height: 1;
+                display: inline-block;
+                font-size: 18px;
+                position: relative;
+                text-align: center;
+            }
+        }
+    }
+}
+
+.login-footer {
+    padding: 30px 0 50px;
+    background: #fff;
+
+    p {
+        text-align: center;
+        color: #999;
+        padding-top: 20px;
+
+        a {
+            line-height: 1;
+            padding: 0 10px;
+            color: #999;
+            display: inline-block;
+
+            ~a {
+                border-left: 1px solid #ccc;
+            }
+        }
+    }
+}
+
+.account-box {
+    .toggle {
+        padding: 15px 40px;
+        text-align: right;
+
+        a {
+            color: $xtxColor;
+
+            i {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .form {
+        padding: 0 20px 20px 20px;
+
+        &-item {
+            margin-bottom: 28px;
+
+            .input {
+                position: relative;
+                height: 36px;
+
+                >i {
+                    width: 34px;
+                    height: 34px;
+                    background: #cfcdcd;
+                    color: #fff;
+                    position: absolute;
+                    left: 1px;
+                    top: 1px;
+                    text-align: center;
+                    line-height: 34px;
+                    font-size: 18px;
+                }
+
+                input {
+                    padding-left: 44px;
+                    border: 1px solid #cfcdcd;
+                    height: 36px;
+                    line-height: 36px;
+                    width: 100%;
+
+                    &.error {
+                        border-color: $priceColor;
+                    }
+
+                    &.active,
+                    &:focus {
+                        border-color: $xtxColor;
+                    }
+                }
+
+                .code {
+                    position: absolute;
+                    right: 1px;
+                    top: 1px;
+                    text-align: center;
+                    line-height: 34px;
+                    font-size: 14px;
+                    background: #f5f5f5;
+                    color: #666;
+                    width: 90px;
+                    height: 34px;
+                    cursor: pointer;
+                }
+            }
+
+            >.error {
+                position: absolute;
+                font-size: 12px;
+                line-height: 28px;
+                color: $priceColor;
+
+                i {
+                    font-size: 14px;
+                    margin-right: 2px;
+                }
+            }
+        }
+
+        .agree {
+            a {
+                color: #069;
+            }
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            height: 40px;
+            color: #fff;
+            text-align: center;
+            line-height: 40px;
+            background: $xtxColor;
+
+            &.disabled {
+                background: #cfcdcd;
+            }
+        }
+    }
+
+    .action {
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .url {
+            a {
+                color: #999;
+                margin-left: 10px;
+            }
+        }
+    }
+}
+
+.subBtn {
+    background: $xtxColor;
+    width: 100%;
+    color: #fff;
+}
+</style>
+```
+
+### pinia管理用户数据
+
+store/user.js
+
+```JavaScript
+// 管理用户数据相关
+
+import { defineStore } from "pinia";
+import { ref } from 'vue'
+import { loginAPI } from "@/apis/user";
+
+export const useUserStore = defineStore('user', () => {
+    // 1.定义管理用户数据的state
+    const userInfo = ref({})
+    // 2.定义获取接口数据的action函数
+    const getUserInfo = async ({ account, password }) => {
+        const res = await loginAPI({ account, password })
+        userInfo.value = res.result
+    }
+    // 3.以对象的格式把state和action return
+    return {
+        userInfo,
+        getUserInfo
+    }
+})
+```
+
+views/Login/index.vue
+
+```JavaScript
+<script setup>
+import { ref } from 'vue'
+import { ElMessage } from 'element-plus'
+import 'element-plus/theme-chalk/el-message.css'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+const userStore = useUserStore()
+// 1.准备表单对象
+const form = ref({
+    account: '',
+    password: '',
+    agree: true
+})
+
+// 2.准备规则对象
+const rules = {
+    account: [
+        {
+            required: true, message: '用户名不能为空', trigger: 'blur'
+        }
+    ],
+    password: [
+        {
+            required: true, message: '密码不能为空', trigger: 'blur'
+        },
+        {
+            min: 6, max: 14, message: '密码长度为6-14个字符', trigger: 'blur'
+        }
+    ],
+    agree: [
+        {
+            validator: (rule, value, callback) => {
+                //自定义校验逻辑
+                //勾选就通过 不勾选就不通过
+                if (value) {
+                    callback()
+                } else {
+                    callback(new Error('请勾选协议'))
+                }
+            }
+        }
+    ]
+}
+
+// 3.获取form实例做统一校验
+const formRef = ref(null)
+const router = useRouter()
+const doLogin = () => {
+    const {account,password} = form.value
+    // 调用实例方法
+    formRef.value.validate(async (valid) => {
+        //valid:所有表单都通过校验 才为true
+        // 以valid作为判断条件 如果通过校验才执行登录逻辑
+        if (valid) {
+            //TODO LOGIN
+            userStore.getUserInfo({account,password})
+            // 1.提示用户
+            ElMessage({ type: 'success', message: '登录成功' })
+            // 2.跳转首页
+            router.replace({path:'/'})
+        }
+    })
+}
+</script>
+
+
+<template>
+    <div>
+        <header class="login-header">
+            <div class="container m-top-20">
+                <h1 class="logo">
+                    <RouterLink to="/">小兔鲜</RouterLink>
+                </h1>
+                <RouterLink class="entry" to="/">
+                    进入网站首页
+                    <i class="iconfont icon-angle-right"></i>
+                    <i class="iconfont icon-angle-right"></i>
+                </RouterLink>
+            </div>
+        </header>
+        <section class="login-section">
+            <div class="wrapper">
+                <nav>
+                    <a href="javascript:;">账户登录</a>
+                </nav>
+                <div class="account-box">
+                    <div class="form">
+                        <el-form ref="formRef" :rules="rules" :model="form" label-position="right" label-width="60px"
+                            status-icon>
+                            <el-form-item prop="account" label="账户">
+                                <el-input v-model="form.account" />
+                            </el-form-item>
+                            <el-form-item prop="password" label="密码">
+                                <el-input v-model="form.password" />
+                            </el-form-item>
+                            <el-form-item prop="agree" label-width="22px">
+                                <el-checkbox size="large" v-model="form.agree">
+                                    我已同意隐私条款和服务条款
+                                </el-checkbox>
+                            </el-form-item>
+                            <el-button size="large" @click="doLogin" class="subBtn">点击登录</el-button>
+                        </el-form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="login-footer">
+            <div class="container">
+                <p>
+                    <a href="javascript:;">关于我们</a>
+                    <a href="javascript:;">帮助中心</a>
+                    <a href="javascript:;">售后服务</a>
+                    <a href="javascript:;">配送与验收</a>
+                    <a href="javascript:;">商务合作</a>
+                    <a href="javascript:;">搜索推荐</a>
+                    <a href="javascript:;">友情链接</a>
+                </p>
+                <p>CopyRight &copy; 小兔鲜儿</p>
+            </div>
+        </footer>
+    </div>
+</template>
+
+<style scoped lang='scss'>
+.login-header {
+    background: #fff;
+    border-bottom: 1px solid #e4e4e4;
+
+    .container {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+    }
+
+    .logo {
+        width: 200px;
+
+        a {
+            display: block;
+            height: 132px;
+            width: 100%;
+            text-indent: -9999px;
+            background: url("@/assets/images/logo.png") no-repeat center 18px / contain;
+        }
+    }
+
+    .sub {
+        flex: 1;
+        font-size: 24px;
+        font-weight: normal;
+        margin-bottom: 38px;
+        margin-left: 20px;
+        color: #666;
+    }
+
+    .entry {
+        width: 120px;
+        margin-bottom: 38px;
+        font-size: 16px;
+
+        i {
+            font-size: 14px;
+            color: $xtxColor;
+            letter-spacing: -5px;
+        }
+    }
+}
+
+.login-section {
+    background: url('@/assets/images/login-bg.png') no-repeat center / cover;
+    height: 488px;
+    position: relative;
+
+    .wrapper {
+        width: 380px;
+        background: #fff;
+        position: absolute;
+        left: 50%;
+        top: 54px;
+        transform: translate3d(100px, 0, 0);
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+
+        nav {
+            font-size: 14px;
+            height: 55px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            padding: 0 40px;
+            text-align: right;
+            align-items: center;
+
+            a {
+                flex: 1;
+                line-height: 1;
+                display: inline-block;
+                font-size: 18px;
+                position: relative;
+                text-align: center;
+            }
+        }
+    }
+}
+
+.login-footer {
+    padding: 30px 0 50px;
+    background: #fff;
+
+    p {
+        text-align: center;
+        color: #999;
+        padding-top: 20px;
+
+        a {
+            line-height: 1;
+            padding: 0 10px;
+            color: #999;
+            display: inline-block;
+
+            ~a {
+                border-left: 1px solid #ccc;
+            }
+        }
+    }
+}
+
+.account-box {
+    .toggle {
+        padding: 15px 40px;
+        text-align: right;
+
+        a {
+            color: $xtxColor;
+
+            i {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .form {
+        padding: 0 20px 20px 20px;
+
+        &-item {
+            margin-bottom: 28px;
+
+            .input {
+                position: relative;
+                height: 36px;
+
+                >i {
+                    width: 34px;
+                    height: 34px;
+                    background: #cfcdcd;
+                    color: #fff;
+                    position: absolute;
+                    left: 1px;
+                    top: 1px;
+                    text-align: center;
+                    line-height: 34px;
+                    font-size: 18px;
+                }
+
+                input {
+                    padding-left: 44px;
+                    border: 1px solid #cfcdcd;
+                    height: 36px;
+                    line-height: 36px;
+                    width: 100%;
+
+                    &.error {
+                        border-color: $priceColor;
+                    }
+
+                    &.active,
+                    &:focus {
+                        border-color: $xtxColor;
+                    }
+                }
+
+                .code {
+                    position: absolute;
+                    right: 1px;
+                    top: 1px;
+                    text-align: center;
+                    line-height: 34px;
+                    font-size: 14px;
+                    background: #f5f5f5;
+                    color: #666;
+                    width: 90px;
+                    height: 34px;
+                    cursor: pointer;
+                }
+            }
+
+            >.error {
+                position: absolute;
+                font-size: 12px;
+                line-height: 28px;
+                color: $priceColor;
+
+                i {
+                    font-size: 14px;
+                    margin-right: 2px;
+                }
+            }
+        }
+
+        .agree {
+            a {
+                color: #069;
+            }
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            height: 40px;
+            color: #fff;
+            text-align: center;
+            line-height: 40px;
+            background: $xtxColor;
+
+            &.disabled {
+                background: #cfcdcd;
+            }
+        }
+    }
+
+    .action {
+        padding: 20px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .url {
+            a {
+                color: #999;
+                margin-left: 10px;
+            }
+        }
+    }
+}
+
+.subBtn {
+    background: $xtxColor;
+    width: 100%;
+    color: #fff;
+}
+</style>
+```
+
+### pinia用户数据持久化
+
+使用插件`pnpm i pinia-plugin-persistedstate`
+main.js使用插件
+main.js
+
+```JavaScript
+import { createApp } from "vue";
+import { createPinia } from "pinia";
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+import App from "./App.vue";
+import router from "./router";
+
+// 引入初始化样式文件
+import "@/styles/common.scss";
+
+// 引入懒加载指令插件并注册
+import { lazyPlugin } from "@/directives";
+// 引入全局组件插件
+import { componentPlugin } from "@/components";
+
+const app = createApp(App);
+const pinia = createPinia()
+// 注册持久化插件
+pinia.use(piniaPluginPersistedstate)
+// app.use(createPinia());
+app.use(pinia)
+app.use(router);
+app.use(lazyPlugin);
+app.use(componentPlugin);
+app.mount("#app");
+
+```
+
+stores/user.js
+
+```JavaScript
+// 管理用户数据相关
+
+import { defineStore } from "pinia";
+import { ref } from 'vue'
+import { loginAPI } from "@/apis/user";
+
+export const useUserStore = defineStore('user', () => {
+    // 1.定义管理用户数据的state
+    const userInfo = ref({})
+    // 2.定义获取接口数据的action函数
+    const getUserInfo = async ({ account, password }) => {
+        const res = await loginAPI({ account, password })
+        userInfo.value = res.result
+    }
+    // 3.以对象的格式把state和action return
+    return {
+        userInfo,
+        getUserInfo
+    }
+}, {
+    persist:true
+})
+```
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685691134628-abe545c3-a160-4131-b020-c028c22059b5.png#averageHue=%23f0f0f0&clientId=u2310c487-be9c-4&from=paste&height=98&id=u3ada6885&originHeight=123&originWidth=1232&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=57074&status=done&style=none&taskId=u87dfe455-23dc-4579-9d76-c069253ca83&title=&width=985.6)
+
+### 登录和非登录状态下的模板适配
+
+Layout/components/LayoutNav.vue
+
+```JavaScript
+<script setup>
+import { useUserStore } from '@/stores/user';
+const userStore = useUserStore()
+</script>
+
+<template>
+    <nav class="app-topnav">
+        <div class="container">
+            <ul>
+                <!-- 多模板渲染 区分登录状态和非登录状态 -->
+                <!-- 适配思路：登录时显示第一块 非登录时显示第二块 是否有token -->
+                <template v-if="userStore.userInfo.token">
+                    <li><a href="javascript:;"><i class=" iconfont icon-user"></i>{{userStore.userInfo.account}}</a></li>
+                    <li>
+                        <el-popconfirm title="确认退出吗?" confirm-button-text="确认" cancel-button-text="取消">
+                            <template #reference>
+                                <a href="javascript:;">退出登录</a>
+                            </template>
+                        </el-popconfirm>
+                    </li>
+                    <li><a href="javascript:;">我的订单</a></li>
+                    <li><a href="javascript:;">会员中心</a></li>
+                </template>
+                <template v-else>
+                    <li><a href="javascript:;" @click="$router.push('/login')">请先登录</a></li>
+                    <li><a href="javascript:;">帮助中心</a></li>
+                    <li><a href="javascript:;">关于我们</a></li>
+                </template>
+            </ul>
+        </div>
+    </nav>
+</template>
+
+
+<style scoped lang="scss">
+.app-topnav {
+    background: #333;
+
+    ul {
+        display: flex;
+        height: 53px;
+        justify-content: flex-end;
+        align-items: center;
+
+        li {
+            a {
+                padding: 0 15px;
+                color: #cdcdcd;
+                line-height: 1;
+                display: inline-block;
+
+                i {
+                    font-size: 14px;
+                    margin-right: 2px;
+                }
+
+                &:hover {
+                    color: $xtxColor;
+                }
+            }
+
+            ~li {
+                a {
+                    border-left: 2px solid #666;
+                }
+            }
+        }
+    }
+}
+</style>
+```
+
+### 请求拦截器携带token
+
+utils/http.js
+
+```JavaScript
+//axios的基础封装
+import axios from "axios";
+import { ElMessage } from "element-plus";
+import "element-plus/theme-chalk/el-message.css";
+import { useUserStore } from "@/stores/user";
+const httpInstance = axios.create({
+  baseURL: "http://pcapi-xiaotuxian-front-devtest.itheima.net",
+  timeout: 5000,
+});
+
+//拦截器
+
+//请求拦截器
+httpInstance.interceptors.request.use(
+  (config) => {
+    // 1.从pinia获取token数据
+    const userStore = useUserStore();
+    // 2.按照后端的要求拼接token数据
+    const token = userStore.userInfo.token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (e) => Promise.reject(e)
+);
+
+// 响应式拦截器
+httpInstance.interceptors.response.use(
+  (res) => res.data,
+  (e) => {
+    // 统一错误提示
+    ElMessage({
+      type: "warning",
+      message: e.response.data.message,
+    });
+    return Promise.reject(e);
+  }
+);
+
+export default httpInstance;
+
+```
+
+### 退出登录业务逻辑实现
+
+stores/user.js
+
+```JavaScript
+// 管理用户数据相关
+
+import { defineStore } from "pinia";
+import { ref } from 'vue'
+import { loginAPI } from "@/apis/user";
+
+export const useUserStore = defineStore('user', () => {
+    // 1.定义管理用户数据的state
+    const userInfo = ref({})
+    // 2.定义获取接口数据的action函数
+    const getUserInfo = async ({ account, password }) => {
+        const res = await loginAPI({ account, password })
+        userInfo.value = res.result
+    }
+    // 退出时清除用户信息
+    const clearUserInfo = () => {
+        userInfo.value = {}
+    }
+    // 3.以对象的格式把state和action return
+    return {
+      userInfo,
+      getUserInfo,
+      clearUserInfo,
+    };
+}, {
+    persist:true
+})
+```
+
+Layout/components/LayoutNav.vue
+
+```JavaScript
+<script setup>
+import { useUserStore } from '@/stores/user';
+import { useRouter } from 'vue-router';
+const userStore = useUserStore()
+const router = useRouter()
+const confirm = () => {
+    // 退出登录业务逻辑实现
+    // 1.清除用户信息 触发action
+    userStore.clearUserInfo()
+    // 2.跳转到登录页
+    router.push('/login')
+}
+</script>
+
+<template>
+    <nav class="app-topnav">
+        <div class="container">
+            <ul>
+                <!-- 多模板渲染 区分登录状态和非登录状态 -->
+                <!-- 适配思路：登录时显示第一块 非登录时显示第二块 是否有token -->
+                <template v-if="userStore.userInfo.token">
+                    <li><a href="javascript:;"><i class=" iconfont icon-user"></i>{{userStore.userInfo.account}}</a></li>
+                    <li>
+                        <el-popconfirm @confirm="confirm" title="确认退出吗?" confirm-button-text="确认" cancel-button-text="取消">
+                            <template #reference>
+                                <a href="javascript:;">退出登录</a>
+                            </template>
+                        </el-popconfirm>
+                    </li>
+                    <li><a href="javascript:;">我的订单</a></li>
+                    <li><a href="javascript:;">会员中心</a></li>
+                </template>
+                <template v-else>
+                    <li><a href="javascript:;" @click="$router.push('/login')">请先登录</a></li>
+                    <li><a href="javascript:;">帮助中心</a></li>
+                    <li><a href="javascript:;">关于我们</a></li>
+                </template>
+            </ul>
+        </div>
+    </nav>
+</template>
+
+
+<style scoped lang="scss">
+.app-topnav {
+    background: #333;
+
+    ul {
+        display: flex;
+        height: 53px;
+        justify-content: flex-end;
+        align-items: center;
+
+        li {
+            a {
+                padding: 0 15px;
+                color: #cdcdcd;
+                line-height: 1;
+                display: inline-block;
+
+                i {
+                    font-size: 14px;
+                    margin-right: 2px;
+                }
+
+                &:hover {
+                    color: $xtxColor;
+                }
+            }
+
+            ~li {
+                a {
+                    border-left: 2px solid #666;
+                }
+            }
+        }
+    }
+}
+</style>
+```
+
+### token失效401拦截处理
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685692316175-779ffa7a-8b05-440f-825d-dae084379701.png#averageHue=%23f8f7f7&clientId=u2310c487-be9c-4&from=paste&height=606&id=ud26ad66a&originHeight=758&originWidth=1583&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=310309&status=done&style=none&taskId=u6f5d3bf7-19b9-48df-bd06-b0926fef3f1&title=&width=1266.4)
+
+ utils/http.js
+
+```JavaScript
+//axios的基础封装
+import axios from "axios";
+import { ElMessage } from "element-plus";
+import "element-plus/theme-chalk/el-message.css";
+import { useUserStore } from "@/stores/user";
+import router from '@/router'
+const httpInstance = axios.create({
+  baseURL: "http://pcapi-xiaotuxian-front-devtest.itheima.net",
+  timeout: 5000,
+});
+
+//拦截器
+
+//请求拦截器
+httpInstance.interceptors.request.use(
+  (config) => {
+    // 1.从pinia获取token数据
+    const userStore = useUserStore();
+    // 2.按照后端的要求拼接token数据
+    const token = userStore.userInfo.token;
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (e) => Promise.reject(e)
+);
+
+// 响应式拦截器
+httpInstance.interceptors.response.use(
+  (res) => res.data,
+  (e) => {
+    const userStore = useUserStore();
+    // 统一错误提示
+    ElMessage({
+      type: "warning",
+      message: e.response.data.message,
+    });
+    //   401token失效处理
+    //   1.清除本地用户数据
+    //   2.跳转到登录页
+      if (e.response.status === 401) {
+          userStore.clearUserInfo()
+          router.push('/login')
+    }
+    return Promise.reject(e);
+  }
+);
+
+export default httpInstance;
+
+```
+
+### 流程梳理和本地加入购物车实现
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685699522306-e1256ab5-33a9-4dc0-bc27-3b4a061fd513.png#averageHue=%23dd985f&clientId=u2310c487-be9c-4&from=paste&height=515&id=u2df10661&originHeight=644&originWidth=1620&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=234750&status=done&style=none&taskId=u5375ac1e-f3ef-4771-aed9-ce01a9b67c0&title=&width=1296)
+
+
+stores/cartstore.js
+
+```JavaScript
+// 封装购物车模块
+
+import { defineStore } from "pinia";
+import { ref } from 'vue'
+
+export const useCartStore = defineStore('cart', () => {
+    // 1.定义state - cartList
+    const cartList = ref([])
+    // 2.定义action - addCart
+    const addCart = (goods) => {
+        //添加购物车操作
+        // 已经添加过 - count + 1
+        // 没有添加过 -直接push
+        // 思路：通过匹配传递过来的商品对象中的skuId能不能在cartList中找到，找到了就是添加过
+        const item = cartList.value.find((item) => goods.skuId === item.skuId)
+        if (item) {
+            //找到了
+            item.count++
+        } else {
+            //没找到
+            cartList.value.push(goods)
+        }
+    }
+    return {
+        cartList,
+        addCart
+    }
+}, {
+    persist:true
+})
+```
+
+Detail.vue
+
+```JavaScript
+<script setup>
+import DetailHot from './components/DetailHot.vue'
+import { getDetail } from '@/apis/detail'
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router'
+import { useCartStore } from '@/stores/cartstore'
+import { ElMessage } from 'element-plus';
+const cartStore = useCartStore()
+const goods = ref({})
+const route = useRoute()
+const getGoods = async () => {
+    const res = await getDetail(route.params.id)
+    goods.value = res.result
+}
+onMounted(() => {
+    getGoods()
+})
+//sku规格被操作时
+let skuObj = {}
+const skuChange = (sku) => {
+    skuObj = sku
+}
+
+//count
+const count = ref(1)
+const countChange = (count) => {
+
+}
+
+//添加购物车
+const addCart = () => {
+    if (skuObj.skuId) {
+        //规格已经选择 触发action
+        cartStore.addCart({
+            id: goods.value.id,
+            name: goods.value.name,
+            picture: goods.value.mainPictures[0],
+            price: goods.value.price,
+            count:count.value,
+            skuId: skuObj.skuId,
+            attrsText: skuObj.specsText,
+            selected:true
+        })
+    } else {
+        //规格没有选择 提示用户
+        ElMessage.warning('请选择规格')
+    }
+}
+</script>
+
+<template>
+    <div class="xtx-goods-page">
+        <div class="container">
+            <div class="bread-container">
+                <el-breadcrumb separator=">">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <!-- 错误原因：goods一开始{} {}.categories -> undefined -> undefined[1]
+                    1.可选链的语法?.
+                    2.v-if手动控制渲染时机 保证只有数据存在才渲染 -->
+                    <el-breadcrumb-item
+                        :to="{ path: `/category/${goods.categories?.[1].id}` }">{{ goods.categories?.[1].name }}
+                    </el-breadcrumb-item>
+                    <el-breadcrumb-item :to="{ path: `/category/sub/${goods.categories?.[0].id}` }">{{
+                        goods.categories?.[0].name }}
+                    </el-breadcrumb-item>
+                    <el-breadcrumb-item>抓绒保暖，毛毛虫子儿童运动鞋</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <!-- 商品信息 -->
+            <div class="info-container">
+                <div>
+                    <div class="goods-info">
+                        <div class="media">
+                            <!-- 图片预览区 -->
+                            <XtxImageView :image-list="goods.mainPictures" />
+                            <!-- 统计数量 -->
+                            <ul class="goods-sales">
+                                <li>
+                                    <p>销量人气</p>
+                                    <p> {{ goods.salesCount }}+ </p>
+                                    <p><i class="iconfont icon-task-filling"></i>销量人气</p>
+                                </li>
+                                <li>
+                                    <p>商品评价</p>
+                                    <p>{{ goods.commentCount }}+</p>
+                                    <p><i class="iconfont icon-comment-filling"></i>查看评价</p>
+                                </li>
+                                <li>
+                                    <p>收藏人气</p>
+                                    <p>{{ goods.collectCount }}+</p>
+                                    <p><i class="iconfont icon-favorite-filling"></i>收藏商品</p>
+                                </li>
+                                <li>
+                                    <p>品牌信息</p>
+                                    <p>{{ goods.brand?.name }}</p>
+                                    <p><i class="iconfont icon-dynamic-filling"></i>品牌主页</p>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="spec">
+                            <!-- 商品信息区 -->
+                            <p class="g-name"> {{ goods.name }} </p>
+                            <p class="g-desc">{{ goods.desc }} </p>
+                            <p class="g-price">
+                                <span>{{ goods.oldPrice }}</span>
+                                <span> {{ goods.price }}</span>
+                            </p>
+                            <div class="g-service">
+                                <dl>
+                                    <dt>促销</dt>
+                                    <dd>12月好物放送，App领券购买直降120元</dd>
+                                </dl>
+                                <dl>
+                                    <dt>服务</dt>
+                                    <dd>
+                                        <span>无忧退货</span>
+                                        <span>快速退款</span>
+                                        <span>免费包邮</span>
+                                        <a href="javascript:;">了解详情</a>
+                                    </dd>
+                                </dl>
+                            </div>
+                            <!-- sku组件 -->
+                            <XtxSku :goods="goods" @change="skuChange" />
+                            <!-- 数据组件 -->
+                            <el-input-number v-model="count" @change="countChange" />
+                            <!-- 按钮组件 -->
+                            <div>
+                                <el-button size="large" class="btn" @click="addCart">
+                                    加入购物车
+                                </el-button>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="goods-footer">
+                        <div class="goods-article">
+                            <!-- 商品详情 -->
+                            <div class="goods-tabs">
+                                <nav>
+                                    <a>商品详情</a>
+                                </nav>
+                                <div class="goods-detail">
+                                    <!-- 属性 -->
+                                    <ul class="attrs">
+                                        <li v-for="item in goods.details?.properties" :key="item.value">
+                                            <span class="dt">{{ item.name }}</span>
+                                            <span class="dd">{{ item.value }}</span>
+                                        </li>
+                                    </ul>
+                                    <!-- 图片 -->
+                                    <img v-for="img in goods.details?.pictures" :src="img" :key="img" alt="">
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 24热榜+专题推荐 -->
+                        <div class="goods-aside">
+                            <!-- 24小时 -->
+                            <DetailHot :hot-type="1" />
+                            <!-- 周 -->
+                            <DetailHot :hot-type="2" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<style scoped lang='scss'>
+.xtx-goods-page {
+    .goods-info {
+        min-height: 600px;
+        background: #fff;
+        display: flex;
+
+        .media {
+            width: 580px;
+            height: 600px;
+            padding: 30px 50px;
+        }
+
+        .spec {
+            flex: 1;
+            padding: 30px 30px 30px 0;
+        }
+    }
+
+    .goods-footer {
+        display: flex;
+        margin-top: 20px;
+
+        .goods-article {
+            width: 940px;
+            margin-right: 20px;
+        }
+
+        .goods-aside {
+            width: 280px;
+            min-height: 1000px;
+        }
+    }
+
+    .goods-tabs {
+        min-height: 600px;
+        background: #fff;
+    }
+
+    .goods-warn {
+        min-height: 600px;
+        background: #fff;
+        margin-top: 20px;
+    }
+
+    .number-box {
+        display: flex;
+        align-items: center;
+
+        .label {
+            width: 60px;
+            color: #999;
+            padding-left: 10px;
+        }
+    }
+
+    .g-name {
+        font-size: 22px;
+    }
+
+    .g-desc {
+        color: #999;
+        margin-top: 10px;
+    }
+
+    .g-price {
+        margin-top: 10px;
+
+        span {
+            &::before {
+                content: "¥";
+                font-size: 14px;
+            }
+
+            &:first-child {
+                color: $priceColor;
+                margin-right: 10px;
+                font-size: 22px;
+            }
+
+            &:last-child {
+                color: #999;
+                text-decoration: line-through;
+                font-size: 16px;
+            }
+        }
+    }
+
+    .g-service {
+        background: #f5f5f5;
+        width: 500px;
+        padding: 20px 10px 0 10px;
+        margin-top: 10px;
+
+        dl {
+            padding-bottom: 20px;
+            display: flex;
+            align-items: center;
+
+            dt {
+                width: 50px;
+                color: #999;
+            }
+
+            dd {
+                color: #666;
+
+                &:last-child {
+                    span {
+                        margin-right: 10px;
+
+                        &::before {
+                            content: "•";
+                            color: $xtxColor;
+                            margin-right: 2px;
+                        }
+                    }
+
+                    a {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .goods-sales {
+        display: flex;
+        width: 400px;
+        align-items: center;
+        text-align: center;
+        height: 140px;
+
+        li {
+            flex: 1;
+            position: relative;
+
+            ~li::after {
+                position: absolute;
+                top: 10px;
+                left: 0;
+                height: 60px;
+                border-left: 1px solid #e4e4e4;
+                content: "";
+            }
+
+            p {
+                &:first-child {
+                    color: #999;
+                }
+
+                &:nth-child(2) {
+                    color: $priceColor;
+                    margin-top: 10px;
+                }
+
+                &:last-child {
+                    color: #666;
+                    margin-top: 10px;
+
+                    i {
+                        color: $xtxColor;
+                        font-size: 14px;
+                        margin-right: 2px;
+                    }
+
+                    &:hover {
+                        color: $xtxColor;
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.goods-tabs {
+    min-height: 600px;
+    background: #fff;
+
+    nav {
+        height: 70px;
+        line-height: 70px;
+        display: flex;
+        border-bottom: 1px solid #f5f5f5;
+
+        a {
+            padding: 0 40px;
+            font-size: 18px;
+            position: relative;
+
+            >span {
+                color: $priceColor;
+                font-size: 16px;
+                margin-left: 10px;
+            }
+        }
+    }
+}
+
+.goods-detail {
+    padding: 40px;
+
+    .attrs {
+        display: flex;
+        flex-wrap: wrap;
+        margin-bottom: 30px;
+
+        li {
+            display: flex;
+            margin-bottom: 10px;
+            width: 50%;
+
+            .dt {
+                width: 100px;
+                color: #999;
+            }
+
+            .dd {
+                flex: 1;
+                color: #666;
+            }
+        }
+    }
+
+    >img {
+        width: 100%;
+    }
+}
+
+.btn {
+    margin-top: 20px;
+
+}
+
+.bread-container {
+    padding: 25px 0;
+}
+</style>
+```
+
+### 头部购物车列表渲染
+
+Layout/components/HeaderCart.vue
+
+```JavaScript
+<script setup>
+import { useCartStore } from '@/stores/cartstore';
+const cartStore = useCartStore()
+</script>
+
+<template>
+    <div class="cart">
+        <a class="curr" href="javascript:;">
+            <i class="iconfont icon-cart"></i><em>{{ cartStore.cartList.length}}</em>
+        </a>
+        <div class="layer">
+            <div class="list">
+                
+        <div class="item" v-for="i in cartStore.cartList" :key="i">
+          <RouterLink to="">
+            <img :src="i.picture" alt="" />
+            <div class="center">
+              <p class="name ellipsis-2">
+                {{ i.name }}
+              </p>
+              <p class="attr ellipsis">{{ i.attrsText }}</p>
+            </div>
+            <div class="right">
+              <p class="price">&yen;{{ i.price }}</p>
+              <p class="count">x{{ i.count }}</p>
+            </div>
+          </RouterLink>
+          <i class="iconfont icon-close-new" @click="store.delCart(i.skuId)"></i>
+        </div>
+       
+            </div>
+            <div class="foot">
+                <div class="total">
+                    <p>共 10 件商品</p>
+                    <p>&yen; 100.00 </p>
+                </div>
+                <el-button size="large" type="primary">去购物车结算</el-button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.cart {
+    width: 50px;
+    position: relative;
+    z-index: 600;
+
+    .curr {
+        height: 32px;
+        line-height: 32px;
+        text-align: center;
+        position: relative;
+        display: block;
+
+        .icon-cart {
+            font-size: 22px;
+        }
+
+        em {
+            font-style: normal;
+            position: absolute;
+            right: 0;
+            top: 0;
+            padding: 1px 6px;
+            line-height: 1;
+            background: $helpColor;
+            color: #fff;
+            font-size: 12px;
+            border-radius: 10px;
+            font-family: Arial;
+        }
+    }
+
+    &:hover {
+        .layer {
+            opacity: 1;
+            transform: none;
+        }
+    }
+
+    .layer {
+        opacity: 0;
+        transition: all 0.4s 0.2s;
+        transform: translateY(-200px) scale(1, 0);
+        width: 400px;
+        height: 400px;
+        position: absolute;
+        top: 50px;
+        right: 0;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        background: #fff;
+        border-radius: 4px;
+        padding-top: 10px;
+
+        &::before {
+            content: "";
+            position: absolute;
+            right: 14px;
+            top: -10px;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            transform: scale(0.6, 1) rotate(45deg);
+            box-shadow: -3px -3px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .foot {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 70px;
+            width: 100%;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            background: #f8f8f8;
+            align-items: center;
+
+            .total {
+                padding-left: 10px;
+                color: #999;
+
+                p {
+                    &:last-child {
+                        font-size: 18px;
+                        color: $priceColor;
+                    }
+                }
+            }
+        }
+    }
+
+    .list {
+        height: 310px;
+        overflow: auto;
+        padding: 0 10px;
+
+        &::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        &::-webkit-scrollbar-track {
+            background: #f8f8f8;
+            border-radius: 2px;
+        }
+
+        &::-webkit-scrollbar-thumb {
+            background: #eee;
+            border-radius: 10px;
+        }
+
+        &::-webkit-scrollbar-thumb:hover {
+            background: #ccc;
+        }
+
+        .item {
+            border-bottom: 1px solid #f5f5f5;
+            padding: 10px 0;
+            position: relative;
+
+            i {
+                position: absolute;
+                bottom: 38px;
+                right: 0;
+                opacity: 0;
+                color: #666;
+                transition: all 0.5s;
+            }
+
+            &:hover {
+                i {
+                    opacity: 1;
+                    cursor: pointer;
+                }
+            }
+
+            a {
+                display: flex;
+                align-items: center;
+
+                img {
+                    height: 80px;
+                    width: 80px;
+                }
+
+                .center {
+                    padding: 0 10px;
+                    width: 200px;
+
+                    .name {
+                        font-size: 16px;
+                    }
+
+                    .attr {
+                        color: #999;
+                        padding-top: 5px;
+                    }
+                }
+
+                .right {
+                    width: 100px;
+                    padding-right: 20px;
+                    text-align: center;
+
+                    .price {
+                        font-size: 16px;
+                        color: $priceColor;
+                    }
+
+                    .count {
+                        color: #999;
+                        margin-top: 5px;
+                        font-size: 16px;
+                    }
+                }
+            }
+        }
+    }
+}
+</style>
+```
+
+### 头部购物车删除功能实现
+
+stores/cartstore.js
+
+```JavaScript
+    // 封装购物车模块
+
+    import { defineStore } from "pinia";
+    import { ref } from 'vue'
+
+    export const useCartStore = defineStore('cart', () => {
+        // 1.定义state - cartList
+        const cartList = ref([])
+        // 2.定义action - addCart
+        const addCart = (goods) => {
+            //添加购物车操作
+            // 已经添加过 - count + 1
+            // 没有添加过 -直接push
+            // 思路：通过匹配传递过来的商品对象中的skuId能不能在cartList中找到，找到了就是添加过
+            const item = cartList.value.find((item) => goods.skuId === item.skuId)
+            if (item) {
+                //找到了
+                item.count++
+            } else {
+                //没找到
+                cartList.value.push(goods)
+            }
+        }
+        //删除购物车
+        const delCart = (skuId) => {
+            // 思路
+            // 1.找到要删除项的下标值 - splice
+            // 2.使用数组的过滤方法 - filter
+            const idx = cartList.value.findIndex((item) => skuId === item.skuId)
+            cartList.value.splice(idx,1)
+        }
+        return {
+          cartList,
+          addCart,
+          delCart,
+        };
+    }, {
+        persist:true
+    })
+```
+
+### 头部购物车统计计算
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685701268726-f61c4715-9da2-4646-82e0-b26971053df4.png#averageHue=%23f9f9f9&clientId=u2310c487-be9c-4&from=paste&height=599&id=u077fd637&originHeight=749&originWidth=1257&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=194645&status=done&style=none&taskId=uf0a8edc9-42da-4835-8426-8ecfcb5467c&title=&width=1005.6)
+
+
+stores/cartstore.js
+
+```JavaScript
+// 封装购物车模块
+
+import { defineStore } from "pinia";
+import { ref ,computed} from "vue";
+
+export const useCartStore = defineStore(
+  "cart",
+  () => {
+    // 1.定义state - cartList
+    const cartList = ref([]);
+    // 2.定义action - addCart
+    const addCart = (goods) => {
+      //添加购物车操作
+      // 已经添加过 - count + 1
+      // 没有添加过 -直接push
+      // 思路：通过匹配传递过来的商品对象中的skuId能不能在cartList中找到，找到了就是添加过
+      const item = cartList.value.find((item) => goods.skuId === item.skuId);
+      if (item) {
+        //找到了
+        item.count++;
+      } else {
+        //没找到
+        cartList.value.push(goods);
+      }
+    };
+    //删除购物车
+    const delCart = (skuId) => {
+      // 思路
+      // 1.找到要删除项的下标值 - splice
+      // 2.使用数组的过滤方法 - filter
+      const idx = cartList.value.findIndex((item) => skuId === item.skuId);
+      cartList.value.splice(idx, 1);
+    };
+
+    // 计算属性
+    // 1.总的数量 所有项的count之和
+    const allCount = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count, 0)
+    );
+    // 2.总价 所有项的count*price之和
+    const allPrice = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count * c.price, 0)
+    );
+
+    return {
+      cartList,
+      addCart,
+      delCart,
+      allCount,
+      allPrice
+    };
+  },
+  {
+    persist: true,
+  }
+);
+
+```
+
+### 列表购物车基础数据渲染
+
+router/index.js
+
+```JavaScript
+// createRouter:创建router实例对象
+// createWebHistory:创建history模式的路由
+
+import { createRouter, createWebHistory } from "vue-router";
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  //path和component对应关系的位置
+  routes: [
+    {
+      path: "/",
+      component: () => import("@/views/Layout/index.vue"),
+      children: [
+        {
+          path: "",
+          component: () => import("@/views/Home/index.vue"),
+        },
+        {
+          path: "category/:id",
+          component: () => import("@/views/Category/index.vue"),
+        },
+        {
+          path: "category/sub/:id",
+          component: () => import("@/views/SubCategory/index.vue"),
+        },
+        {
+          path: "detail/:id",
+          component: () => import("@/views/Detail/index.vue"),
+        },
+        {
+          path: 'cartlist',
+          component:() => import("@/views/CartList/index.vue")
+        }
+      ],
+    },
+    {
+      path: "/login",
+      component: () => import("@/views/Login/index.vue"),
+    },
+  ],
+  scrollBehavior() {
+    return {
+      top: 0,
+    };
+  },
+});
+
+export default router;
+
+```
+
+views/Cartlist/index.vue
+
+```JavaScript
+<script setup>
+import { useCartStore } from '@/stores/cartstore';
+const cartStore = useCartStore()
+</script>
+
+<template>
+    <div class="xtx-cart-page">
+        <div class="container m-top-20">
+            <div class="cart">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="120">
+                                <el-checkbox />
+                            </th>
+                            <th width="400">商品信息</th>
+                            <th width="220">单价</th>
+                            <th width="180">数量</th>
+                            <th width="180">小计</th>
+                            <th width="140">操作</th>
+                        </tr>
+                    </thead>
+                    <!-- 商品列表 -->
+                    <tbody>
+                        <tr v-for="i in cartStore.cartList" :key="i.id">
+                            <td>
+                                <el-checkbox />
+                            </td>
+                            <td>
+                                <div class="goods">
+                                    <RouterLink to="/"><img :src="i.picture" alt="" /></RouterLink>
+                                    <div>
+                                        <p class="name ellipsis">
+                                            {{ i.name }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="tc">
+                                <p>&yen;{{ i.price }}</p>
+                            </td>
+                            <td class="tc">
+                                <el-input-number v-model="i.count" />
+                            </td>
+                            <td class="tc">
+                                <p class="f16 red">&yen;{{ (i.price * i.count).toFixed(2) }}</p>
+                            </td>
+                            <td class="tc">
+                                <p>
+                                    <el-popconfirm title="确认删除吗?" confirm-button-text="确认" cancel-button-text="取消"
+                                        @confirm="delCart(i)">
+                                        <template #reference>
+                                            <a href="javascript:;">删除</a>
+                                        </template>
+                                    </el-popconfirm>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr v-if="cartStore.cartList.length === 0">
+                            <td colspan="6">
+                                <div class="cart-none">
+                                    <el-empty description="购物车列表为空">
+                                        <el-button type="primary">随便逛逛</el-button>
+                                    </el-empty>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+            <!-- 操作栏 -->
+            <div class="action">
+                <div class="batch">
+                    共 10 件商品，已选择 2 件，商品合计：
+                    <span class="red">¥ 200.00 </span>
+                </div>
+                <div class="total">
+                    <el-button size="large" type="primary">下单结算</el-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.xtx-cart-page {
+    margin-top: 20px;
+
+    .cart {
+        background: #fff;
+        color: #666;
+
+        table {
+            border-spacing: 0;
+            border-collapse: collapse;
+            line-height: 24px;
+
+            th,
+            td {
+                padding: 10px;
+                border-bottom: 1px solid #f5f5f5;
+
+                &:first-child {
+                    text-align: left;
+                    padding-left: 30px;
+                    color: #999;
+                }
+            }
+
+            th {
+                font-size: 16px;
+                font-weight: normal;
+                line-height: 50px;
+            }
+        }
+    }
+
+    .cart-none {
+        text-align: center;
+        padding: 120px 0;
+        background: #fff;
+
+        p {
+            color: #999;
+            padding: 20px 0;
+        }
+    }
+
+    .tc {
+        text-align: center;
+
+        a {
+            color: $xtxColor;
+        }
+
+        .xtx-numbox {
+            margin: 0 auto;
+            width: 120px;
+        }
+    }
+
+    .red {
+        color: $priceColor;
+    }
+
+    .green {
+        color: $xtxColor;
+    }
+
+    .f16 {
+        font-size: 16px;
+    }
+
+    .goods {
+        display: flex;
+        align-items: center;
+
+        img {
+            width: 100px;
+            height: 100px;
+        }
+
+        >div {
+            width: 280px;
+            font-size: 16px;
+            padding-left: 10px;
+
+            .attr {
+                font-size: 14px;
+                color: #999;
+            }
+        }
+    }
+
+    .action {
+        display: flex;
+        background: #fff;
+        margin-top: 20px;
+        height: 80px;
+        align-items: center;
+        font-size: 16px;
+        justify-content: space-between;
+        padding: 0 30px;
+
+        .xtx-checkbox {
+            color: #999;
+        }
+
+        .batch {
+            a {
+                margin-left: 20px;
+            }
+        }
+
+        .red {
+            font-size: 18px;
+            margin-right: 20px;
+            font-weight: bold;
+        }
+    }
+
+    .tit {
+        color: #666;
+        font-size: 16px;
+        font-weight: normal;
+        line-height: 50px;
+    }
+
+}
+</style>
+```
+
+### 列表购物车单选功能
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685702428416-fa9b2d20-1839-445b-89e6-f4cfea272288.png#averageHue=%23f8f8f8&clientId=u2310c487-be9c-4&from=paste&height=617&id=ube5163a6&originHeight=771&originWidth=1636&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=319528&status=done&style=none&taskId=u09fd3984-bf79-4dcd-8b21-7d0719f5e50&title=&width=1308.8)
+
+stores/cartstore.js
+
+```JavaScript
+// 封装购物车模块
+
+import { defineStore } from "pinia";
+import { ref ,computed} from "vue";
+
+export const useCartStore = defineStore(
+  "cart",
+  () => {
+    // 1.定义state - cartList
+    const cartList = ref([]);
+    // 2.定义action - addCart
+    const addCart = (goods) => {
+      //添加购物车操作
+      // 已经添加过 - count + 1
+      // 没有添加过 -直接push
+      // 思路：通过匹配传递过来的商品对象中的skuId能不能在cartList中找到，找到了就是添加过
+      const item = cartList.value.find((item) => goods.skuId === item.skuId);
+      if (item) {
+        //找到了
+        item.count++;
+      } else {
+        //没找到
+        cartList.value.push(goods);
+      }
+    };
+    //删除购物车
+    const delCart = (skuId) => {
+      // 思路
+      // 1.找到要删除项的下标值 - splice
+      // 2.使用数组的过滤方法 - filter
+      const idx = cartList.value.findIndex((item) => skuId === item.skuId);
+      cartList.value.splice(idx, 1);
+    };
+
+    //   单选功能
+      const singleCheck = (skuId, selected) => {
+        //   通过skuId找到要修改的那一项 然后把它的selected修改为传过来的selected
+          const item = cartList.value.find((item) => item.skuId === skuId)
+          item.selected = selected
+      }
+      
+    // 计算属性
+    // 1.总的数量 所有项的count之和
+    const allCount = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count, 0)
+    );
+    // 2.总价 所有项的count*price之和
+    const allPrice = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count * c.price, 0)
+    );
+
+    return {
+      cartList,
+      addCart,
+      delCart,
+      allCount,
+      allPrice,
+      singleCheck,
+    };
+  },
+  {
+    persist: true,
+  }
+);
+
+```
+
+views/Cartlist/index.vue
+
+```JavaScript
+<script setup>
+import { useCartStore } from '@/stores/cartstore';
+const cartStore = useCartStore()
+//单选回调
+const singleCheck = (i, selected) => {
+    // store cartList 数组 无法知道要修改谁的选中状态
+    // 除了selected补充一个用来筛选的参数-skuId
+    cartStore.singleCheck(i.skuId,selected)
+}
+</script>
+
+<template>
+    <div class="xtx-cart-page">
+        <div class="container m-top-20">
+            <div class="cart">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="120">
+                                <el-checkbox />
+                            </th>
+                            <th width="400">商品信息</th>
+                            <th width="220">单价</th>
+                            <th width="180">数量</th>
+                            <th width="180">小计</th>
+                            <th width="140">操作</th>
+                        </tr>
+                    </thead>
+                    <!-- 商品列表 -->
+                    <tbody>
+                        <tr v-for="i in cartStore.cartList" :key="i.id">
+                            <td>
+                                <!-- 单选框 -->
+                                <el-checkbox :model-value="i.selected" @change="(selected) => singleCheck(i,selected)"/>
+                            </td>
+                            <td>
+                                <div class="goods">
+                                    <RouterLink to="/"><img :src="i.picture" alt="" /></RouterLink>
+                                    <div>
+                                        <p class="name ellipsis">
+                                            {{ i.name }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="tc">
+                                <p>&yen;{{ i.price }}</p>
+                            </td>
+                            <td class="tc">
+                                <el-input-number v-model="i.count" />
+                            </td>
+                            <td class="tc">
+                                <p class="f16 red">&yen;{{ (i.price * i.count).toFixed(2) }}</p>
+                            </td>
+                            <td class="tc">
+                                <p>
+                                    <el-popconfirm title="确认删除吗?" confirm-button-text="确认" cancel-button-text="取消"
+                                        @confirm="delCart(i)">
+                                        <template #reference>
+                                            <a href="javascript:;">删除</a>
+                                        </template>
+                                    </el-popconfirm>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr v-if="cartStore.cartList.length === 0">
+                            <td colspan="6">
+                                <div class="cart-none">
+                                    <el-empty description="购物车列表为空">
+                                        <el-button type="primary">随便逛逛</el-button>
+                                    </el-empty>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+            <!-- 操作栏 -->
+            <div class="action">
+                <div class="batch">
+                    共 10 件商品，已选择 2 件，商品合计：
+                    <span class="red">¥ 200.00 </span>
+                </div>
+                <div class="total">
+                    <el-button size="large" type="primary">下单结算</el-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.xtx-cart-page {
+    margin-top: 20px;
+
+    .cart {
+        background: #fff;
+        color: #666;
+
+        table {
+            border-spacing: 0;
+            border-collapse: collapse;
+            line-height: 24px;
+
+            th,
+            td {
+                padding: 10px;
+                border-bottom: 1px solid #f5f5f5;
+
+                &:first-child {
+                    text-align: left;
+                    padding-left: 30px;
+                    color: #999;
+                }
+            }
+
+            th {
+                font-size: 16px;
+                font-weight: normal;
+                line-height: 50px;
+            }
+        }
+    }
+
+    .cart-none {
+        text-align: center;
+        padding: 120px 0;
+        background: #fff;
+
+        p {
+            color: #999;
+            padding: 20px 0;
+        }
+    }
+
+    .tc {
+        text-align: center;
+
+        a {
+            color: $xtxColor;
+        }
+
+        .xtx-numbox {
+            margin: 0 auto;
+            width: 120px;
+        }
+    }
+
+    .red {
+        color: $priceColor;
+    }
+
+    .green {
+        color: $xtxColor;
+    }
+
+    .f16 {
+        font-size: 16px;
+    }
+
+    .goods {
+        display: flex;
+        align-items: center;
+
+        img {
+            width: 100px;
+            height: 100px;
+        }
+
+        >div {
+            width: 280px;
+            font-size: 16px;
+            padding-left: 10px;
+
+            .attr {
+                font-size: 14px;
+                color: #999;
+            }
+        }
+    }
+
+    .action {
+        display: flex;
+        background: #fff;
+        margin-top: 20px;
+        height: 80px;
+        align-items: center;
+        font-size: 16px;
+        justify-content: space-between;
+        padding: 0 30px;
+
+        .xtx-checkbox {
+            color: #999;
+        }
+
+        .batch {
+            a {
+                margin-left: 20px;
+            }
+        }
+
+        .red {
+            font-size: 18px;
+            margin-right: 20px;
+            font-weight: bold;
+        }
+    }
+
+    .tit {
+        color: #666;
+        font-size: 16px;
+        font-weight: normal;
+        line-height: 50px;
+    }
+
+}
+</style>
+```
+
+### 列表购物车全选功能
+
+stores/cartstore.js
+
+```JavaScript
+// 封装购物车模块
+
+import { defineStore } from "pinia";
+import { ref ,computed} from "vue";
+
+export const useCartStore = defineStore(
+  "cart",
+  () => {
+    // 1.定义state - cartList
+    const cartList = ref([]);
+    // 2.定义action - addCart
+    const addCart = (goods) => {
+      //添加购物车操作
+      // 已经添加过 - count + 1
+      // 没有添加过 -直接push
+      // 思路：通过匹配传递过来的商品对象中的skuId能不能在cartList中找到，找到了就是添加过
+      const item = cartList.value.find((item) => goods.skuId === item.skuId);
+      if (item) {
+        //找到了
+        item.count++;
+      } else {
+        //没找到
+        cartList.value.push(goods);
+      }
+    };
+    //删除购物车
+    const delCart = (skuId) => {
+      // 思路
+      // 1.找到要删除项的下标值 - splice
+      // 2.使用数组的过滤方法 - filter
+      const idx = cartList.value.findIndex((item) => skuId === item.skuId);
+      cartList.value.splice(idx, 1);
+    };
+
+    //   单选功能
+      const singleCheck = (skuId, selected) => {
+        //   通过skuId找到要修改的那一项 然后把它的selected修改为传过来的selected
+          const item = cartList.value.find((item) => item.skuId === skuId)
+          item.selected = selected
+      }
+      
+    // 计算属性
+    // 1.总的数量 所有项的count之和
+    const allCount = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count, 0)
+    );
+    // 2.总价 所有项的count*price之和
+    const allPrice = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count * c.price, 0)
+    );
+
+      //是否全选
+      const isAll = computed(() => cartList.value.every((item) => item.selected))
+
+      //全选功能
+      const allCheck = (selected) => {
+          //把cartList中的每一项的selected都设置为当前的全选框状态
+          cartList.value.forEach(item => item.selected = selected)
+      }
+    return {
+      cartList,
+      addCart,
+      delCart,
+      allCount,
+      allPrice,
+      singleCheck,
+      isAll,
+      allCheck,
+    };
+  },
+  {
+    persist: true,
+  }
+);
+
+```
+
+views/Cartlist/index.vue
+
+```JavaScript
+<script setup>
+import { useCartStore } from '@/stores/cartstore';
+const cartStore = useCartStore()
+//单选回调
+const singleCheck = (i, selected) => {
+    // store cartList 数组 无法知道要修改谁的选中状态
+    // 除了selected补充一个用来筛选的参数-skuId
+    cartStore.singleCheck(i.skuId,selected)
+}
+
+const allCheck = (selected) => {
+    cartStore.allCheck(selected)
+}
+</script>
+
+<template>
+    <div class="xtx-cart-page">
+        <div class="container m-top-20">
+            <div class="cart">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="120">
+                                <el-checkbox :model-value="cartStore.isAll" @change="allCheck"/>
+                            </th>
+                            <th width="400">商品信息</th>
+                            <th width="220">单价</th>
+                            <th width="180">数量</th>
+                            <th width="180">小计</th>
+                            <th width="140">操作</th>
+                        </tr>
+                    </thead>
+                    <!-- 商品列表 -->
+                    <tbody>
+                        <tr v-for="i in cartStore.cartList" :key="i.id">
+                            <td>
+                                <!-- 单选框 -->
+                                <el-checkbox :model-value="i.selected" @change="(selected) => singleCheck(i,selected)"/>
+                            </td>
+                            <td>
+                                <div class="goods">
+                                    <RouterLink to="/"><img :src="i.picture" alt="" /></RouterLink>
+                                    <div>
+                                        <p class="name ellipsis">
+                                            {{ i.name }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="tc">
+                                <p>&yen;{{ i.price }}</p>
+                            </td>
+                            <td class="tc">
+                                <el-input-number v-model="i.count" />
+                            </td>
+                            <td class="tc">
+                                <p class="f16 red">&yen;{{ (i.price * i.count).toFixed(2) }}</p>
+                            </td>
+                            <td class="tc">
+                                <p>
+                                    <el-popconfirm title="确认删除吗?" confirm-button-text="确认" cancel-button-text="取消"
+                                        @confirm="delCart(i)">
+                                        <template #reference>
+                                            <a href="javascript:;">删除</a>
+                                        </template>
+                                    </el-popconfirm>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr v-if="cartStore.cartList.length === 0">
+                            <td colspan="6">
+                                <div class="cart-none">
+                                    <el-empty description="购物车列表为空">
+                                        <el-button type="primary">随便逛逛</el-button>
+                                    </el-empty>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+            <!-- 操作栏 -->
+            <div class="action">
+                <div class="batch">
+                    共 10 件商品，已选择 2 件，商品合计：
+                    <span class="red">¥ 200.00 </span>
+                </div>
+                <div class="total">
+                    <el-button size="large" type="primary">下单结算</el-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.xtx-cart-page {
+    margin-top: 20px;
+
+    .cart {
+        background: #fff;
+        color: #666;
+
+        table {
+            border-spacing: 0;
+            border-collapse: collapse;
+            line-height: 24px;
+
+            th,
+            td {
+                padding: 10px;
+                border-bottom: 1px solid #f5f5f5;
+
+                &:first-child {
+                    text-align: left;
+                    padding-left: 30px;
+                    color: #999;
+                }
+            }
+
+            th {
+                font-size: 16px;
+                font-weight: normal;
+                line-height: 50px;
+            }
+        }
+    }
+
+    .cart-none {
+        text-align: center;
+        padding: 120px 0;
+        background: #fff;
+
+        p {
+            color: #999;
+            padding: 20px 0;
+        }
+    }
+
+    .tc {
+        text-align: center;
+
+        a {
+            color: $xtxColor;
+        }
+
+        .xtx-numbox {
+            margin: 0 auto;
+            width: 120px;
+        }
+    }
+
+    .red {
+        color: $priceColor;
+    }
+
+    .green {
+        color: $xtxColor;
+    }
+
+    .f16 {
+        font-size: 16px;
+    }
+
+    .goods {
+        display: flex;
+        align-items: center;
+
+        img {
+            width: 100px;
+            height: 100px;
+        }
+
+        >div {
+            width: 280px;
+            font-size: 16px;
+            padding-left: 10px;
+
+            .attr {
+                font-size: 14px;
+                color: #999;
+            }
+        }
+    }
+
+    .action {
+        display: flex;
+        background: #fff;
+        margin-top: 20px;
+        height: 80px;
+        align-items: center;
+        font-size: 16px;
+        justify-content: space-between;
+        padding: 0 30px;
+
+        .xtx-checkbox {
+            color: #999;
+        }
+
+        .batch {
+            a {
+                margin-left: 20px;
+            }
+        }
+
+        .red {
+            font-size: 18px;
+            margin-right: 20px;
+            font-weight: bold;
+        }
+    }
+
+    .tit {
+        color: #666;
+        font-size: 16px;
+        font-weight: normal;
+        line-height: 50px;
+    }
+
+}
+</style>
+```
+
+### 列表购物车-统计数据实现
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685704872050-5f4adc5e-b838-4b1d-8848-f587be182c8d.png#averageHue=%23f6f3f1&clientId=u2310c487-be9c-4&from=paste&height=128&id=uc9b8d57c&originHeight=160&originWidth=933&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=90180&status=done&style=none&taskId=u97475e59-f7fb-491f-9962-06d529b5327&title=&width=746.4)
+
+
+stores/cartstore.js
+
+```JavaScript
+// 封装购物车模块
+
+import { defineStore } from "pinia";
+import { ref ,computed} from "vue";
+
+export const useCartStore = defineStore(
+  "cart",
+  () => {
+    // 1.定义state - cartList
+    const cartList = ref([]);
+    // 2.定义action - addCart
+    const addCart = (goods) => {
+      //添加购物车操作
+      // 已经添加过 - count + 1
+      // 没有添加过 -直接push
+      // 思路：通过匹配传递过来的商品对象中的skuId能不能在cartList中找到，找到了就是添加过
+      const item = cartList.value.find((item) => goods.skuId === item.skuId);
+      if (item) {
+        //找到了
+        item.count++;
+      } else {
+        //没找到
+        cartList.value.push(goods);
+      }
+    };
+    //删除购物车
+    const delCart = (skuId) => {
+      // 思路
+      // 1.找到要删除项的下标值 - splice
+      // 2.使用数组的过滤方法 - filter
+      const idx = cartList.value.findIndex((item) => skuId === item.skuId);
+      cartList.value.splice(idx, 1);
+    };
+
+    //   单选功能
+      const singleCheck = (skuId, selected) => {
+        //   通过skuId找到要修改的那一项 然后把它的selected修改为传过来的selected
+          const item = cartList.value.find((item) => item.skuId === skuId)
+          item.selected = selected
+      }
+      
+    // 计算属性
+    // 1.总的数量 所有项的count之和
+    const allCount = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count, 0)
+    );
+    // 2.总价 所有项的count*price之和
+    const allPrice = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count * c.price, 0)
+      );
+    //   3.已选择数量
+      const selectedCount = computed(() =>
+        cartList.value.filter((item) => item.selected).reduce((a, c) => a + c.count, 0)
+      );
+
+    //   4.已选择商品价钱合计
+      const selectedPrice = computed(() =>
+        cartList.value.filter((item) => item.selected).reduce((a, c) => a + c.count * c.price, 0)
+      );
+      //是否全选
+      const isAll = computed(() => cartList.value.every((item) => item.selected))
+
+      //全选功能
+      const allCheck = (selected) => {
+          //把cartList中的每一项的selected都设置为当前的全选框状态
+          cartList.value.forEach(item => item.selected = selected)
+      }
+    return {
+      cartList,
+      addCart,
+      delCart,
+      allCount,
+      allPrice,
+      singleCheck,
+      isAll,
+      allCheck,
+      selectedCount,
+      selectedPrice,
+    };
+  },
+  {
+    persist: true,
+  }
+);
+
+```
+
+views/Cartlist/index.vue
+
+```JavaScript
+<script setup>
+import { useCartStore } from '@/stores/cartstore';
+const cartStore = useCartStore()
+//单选回调
+const singleCheck = (i, selected) => {
+    // store cartList 数组 无法知道要修改谁的选中状态
+    // 除了selected补充一个用来筛选的参数-skuId
+    cartStore.singleCheck(i.skuId,selected)
+}
+
+const allCheck = (selected) => {
+    cartStore.allCheck(selected)
+}
+</script>
+
+<template>
+    <div class="xtx-cart-page">
+        <div class="container m-top-20">
+            <div class="cart">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="120">
+                                <el-checkbox :model-value="cartStore.isAll" @change="allCheck"/>
+                            </th>
+                            <th width="400">商品信息</th>
+                            <th width="220">单价</th>
+                            <th width="180">数量</th>
+                            <th width="180">小计</th>
+                            <th width="140">操作</th>
+                        </tr>
+                    </thead>
+                    <!-- 商品列表 -->
+                    <tbody>
+                        <tr v-for="i in cartStore.cartList" :key="i.id">
+                            <td>
+                                <!-- 单选框 -->
+                                <el-checkbox :model-value="i.selected" @change="(selected) => singleCheck(i,selected)"/>
+                            </td>
+                            <td>
+                                <div class="goods">
+                                    <RouterLink to="/"><img :src="i.picture" alt="" /></RouterLink>
+                                    <div>
+                                        <p class="name ellipsis">
+                                            {{ i.name }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="tc">
+                                <p>&yen;{{ i.price }}</p>
+                            </td>
+                            <td class="tc">
+                                <el-input-number v-model="i.count" />
+                            </td>
+                            <td class="tc">
+                                <p class="f16 red">&yen;{{ (i.price * i.count).toFixed(2) }}</p>
+                            </td>
+                            <td class="tc">
+                                <p>
+                                    <el-popconfirm title="确认删除吗?" confirm-button-text="确认" cancel-button-text="取消"
+                                        @confirm="delCart(i)">
+                                        <template #reference>
+                                            <a href="javascript:;">删除</a>
+                                        </template>
+                                    </el-popconfirm>
+                                </p>
+                            </td>
+                        </tr>
+                        <tr v-if="cartStore.cartList.length === 0">
+                            <td colspan="6">
+                                <div class="cart-none">
+                                    <el-empty description="购物车列表为空">
+                                        <el-button type="primary">随便逛逛</el-button>
+                                    </el-empty>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+
+                </table>
+            </div>
+            <!-- 操作栏 -->
+            <div class="action">
+                <div class="batch">
+                    共 {{cartStore.allCount}} 件商品，已选择 {{cartStore.selectedCount}} 件，商品合计：
+                    <span class="red">¥ {{cartStore.selectedPrice.toFixed(2)}} </span>
+                </div>
+                <div class="total">
+                    <el-button size="large" type="primary">下单结算</el-button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.xtx-cart-page {
+    margin-top: 20px;
+
+    .cart {
+        background: #fff;
+        color: #666;
+
+        table {
+            border-spacing: 0;
+            border-collapse: collapse;
+            line-height: 24px;
+
+            th,
+            td {
+                padding: 10px;
+                border-bottom: 1px solid #f5f5f5;
+
+                &:first-child {
+                    text-align: left;
+                    padding-left: 30px;
+                    color: #999;
+                }
+            }
+
+            th {
+                font-size: 16px;
+                font-weight: normal;
+                line-height: 50px;
+            }
+        }
+    }
+
+    .cart-none {
+        text-align: center;
+        padding: 120px 0;
+        background: #fff;
+
+        p {
+            color: #999;
+            padding: 20px 0;
+        }
+    }
+
+    .tc {
+        text-align: center;
+
+        a {
+            color: $xtxColor;
+        }
+
+        .xtx-numbox {
+            margin: 0 auto;
+            width: 120px;
+        }
+    }
+
+    .red {
+        color: $priceColor;
+    }
+
+    .green {
+        color: $xtxColor;
+    }
+
+    .f16 {
+        font-size: 16px;
+    }
+
+    .goods {
+        display: flex;
+        align-items: center;
+
+        img {
+            width: 100px;
+            height: 100px;
+        }
+
+        >div {
+            width: 280px;
+            font-size: 16px;
+            padding-left: 10px;
+
+            .attr {
+                font-size: 14px;
+                color: #999;
+            }
+        }
+    }
+
+    .action {
+        display: flex;
+        background: #fff;
+        margin-top: 20px;
+        height: 80px;
+        align-items: center;
+        font-size: 16px;
+        justify-content: space-between;
+        padding: 0 30px;
+
+        .xtx-checkbox {
+            color: #999;
+        }
+
+        .batch {
+            a {
+                margin-left: 20px;
+            }
+        }
+
+        .red {
+            font-size: 18px;
+            margin-right: 20px;
+            font-weight: bold;
+        }
+    }
+
+    .tit {
+        color: #666;
+        font-size: 16px;
+        font-weight: normal;
+        line-height: 50px;
+    }
+
+}
+</style>
+```
+
+### 接口-加入购物车
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685705431088-e9c6be86-88b3-4951-9b5d-94e050ab672a.png#averageHue=%23f1a266&clientId=u2310c487-be9c-4&from=paste&height=345&id=u94f8200b&originHeight=431&originWidth=1587&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=184412&status=done&style=none&taskId=u61e1c2c0-9aa4-452d-8b0e-de26cfdac0d&title=&width=1269.6)
+
+
+apis/cart.js
+
+```JavaScript
+// 封装购物车相关接口
+import request from '@/utils/http'
+
+// 加入购物车
+export const insertCartAPI = ({ skuId, count }) => {
+    return request({
+        url: '/member/cart',
+        method: 'POST',
+        data: {
+            skuId,
+            count
+        }
+    })
+}
+
+// 获取最新的购物车列表
+export const findNewCartListAPI = () => {
+    return request({
+        url:'/member/cart'
+    })
+}
+```
+
+stores/cartstore.js
+
+```JavaScript
+// 封装购物车模块
+
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import { useUserStore } from "./user";
+import { insertCartAPI,findNewCartListAPI } from "@/apis/cart";
+export const useCartStore = defineStore(
+  "cart",
+  () => {
+    const userStore = useUserStore();
+    const isLogin = computed(() => userStore.userInfo.token);
+    // 1.定义state - cartList
+    const cartList = ref([]);
+    // 2.定义action - addCart
+      const addCart = async(goods) => {
+        const {skuId,count} = goods
+      if (isLogin.value) {
+        //登录之后的加入购物车逻辑
+          await insertCartAPI({ skuId, count })
+          const res = await findNewCartListAPI()
+          cartList.value = res.result
+      } else {
+        //添加购物车操作
+        // 已经添加过 - count + 1
+        // 没有添加过 -直接push
+        // 思路：通过匹配传递过来的商品对象中的skuId能不能在cartList中找到，找到了就是添加过
+        const item = cartList.value.find((item) => goods.skuId === item.skuId);
+        if (item) {
+          //找到了
+          item.count++;
+        } else {
+          //没找到
+          cartList.value.push(goods);
+        }
+      }
+    };
+    //删除购物车
+    const delCart = (skuId) => {
+      // 思路
+      // 1.找到要删除项的下标值 - splice
+      // 2.使用数组的过滤方法 - filter
+      const idx = cartList.value.findIndex((item) => skuId === item.skuId);
+      cartList.value.splice(idx, 1);
+    };
+
+    //   单选功能
+    const singleCheck = (skuId, selected) => {
+      //   通过skuId找到要修改的那一项 然后把它的selected修改为传过来的selected
+      const item = cartList.value.find((item) => item.skuId === skuId);
+      item.selected = selected;
+    };
+
+    // 计算属性
+    // 1.总的数量 所有项的count之和
+    const allCount = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count, 0)
+    );
+    // 2.总价 所有项的count*price之和
+    const allPrice = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count * c.price, 0)
+    );
+    //   3.已选择数量
+    const selectedCount = computed(() =>
+      cartList.value
+        .filter((item) => item.selected)
+        .reduce((a, c) => a + c.count, 0)
+    );
+
+    //   4.已选择商品价钱合计
+    const selectedPrice = computed(() =>
+      cartList.value
+        .filter((item) => item.selected)
+        .reduce((a, c) => a + c.count * c.price, 0)
+    );
+    //是否全选
+    const isAll = computed(() => cartList.value.every((item) => item.selected));
+
+    //全选功能
+    const allCheck = (selected) => {
+      //把cartList中的每一项的selected都设置为当前的全选框状态
+      cartList.value.forEach((item) => (item.selected = selected));
+    };
+    return {
+      cartList,
+      addCart,
+      delCart,
+      allCount,
+      allPrice,
+      singleCheck,
+      isAll,
+      allCheck,
+      selectedCount,
+      selectedPrice,
+    };
+  },
+  {
+    persist: true,
+  }
+);
+
+```
+
+### 接口-删除购物车
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685706359389-313f7748-ab9c-4f06-99f1-d6aaf49202f4.png#averageHue=%23f09c5c&clientId=u2310c487-be9c-4&from=paste&height=258&id=u240cc961&originHeight=323&originWidth=1520&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=151340&status=done&style=none&taskId=uef2918a3-fcce-4b70-8e24-58aca01522e&title=&width=1216)
+
+
+apis/cart.js
+
+```JavaScript
+// 封装购物车相关接口
+import request from '@/utils/http'
+
+// 加入购物车
+export const insertCartAPI = ({ skuId, count }) => {
+    return request({
+        url: '/member/cart',
+        method: 'POST',
+        data: {
+            skuId,
+            count
+        }
+    })
+}
+
+// 获取最新的购物车列表
+export const findNewCartListAPI = () => {
+    return request({
+        url:'/member/cart'
+    })
+}
+
+// 删除购物车
+export const delCartAPI = (ids) => {
+    return request({
+        url: '/member/cart',
+        method: 'DELETE',
+        data: {
+            ids
+        }
+    })
+}
+```
+
+stores/cartStore.js
+
+```JavaScript
+// 封装购物车模块
+
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import { useUserStore } from "./userStore";
+import { insertCartAPI, findNewCartListAPI, delCartAPI } from "@/apis/cart";
+export const useCartStore = defineStore(
+  "cart",
+  () => {
+    const userStore = useUserStore();
+    const isLogin = computed(() => userStore.userInfo.token);
+    // 1.定义state - cartList
+    const cartList = ref([]);
+    // 2.定义action - addCart
+    const addCart = async (goods) => {
+      const { skuId, count } = goods;
+      if (isLogin.value) {
+        //登录之后的加入购物车逻辑
+        await insertCartAPI({ skuId, count });
+        updateNewList();
+      } else {
+        //添加购物车操作
+        // 已经添加过 - count + 1
+        // 没有添加过 -直接push
+        // 思路：通过匹配传递过来的商品对象中的skuId能不能在cartList中找到，找到了就是添加过
+        const item = cartList.value.find((item) => goods.skuId === item.skuId);
+        if (item) {
+          //找到了
+          item.count++;
+        } else {
+          //没找到
+          cartList.value.push(goods);
+        }
+      }
+    };
+    //删除购物车
+    const delCart = async (skuId) => {
+      if (isLogin.value) {
+        //调用接口实现接口购物车中的删除功能
+        await delCartAPI([skuId]);
+        updateNewList();
+      } else {
+        // 思路
+        // 1.找到要删除项的下标值 - splice
+        // 2.使用数组的过滤方法 - filter
+        const idx = cartList.value.findIndex((item) => skuId === item.skuId);
+        cartList.value.splice(idx, 1);
+      }
+    };
+
+    //   获取最新购物车列表action
+    const updateNewList = async () => {
+      const res = await findNewCartListAPI();
+      cartList.value = res.result;
+    };
+    //   单选功能
+    const singleCheck = (skuId, selected) => {
+      //   通过skuId找到要修改的那一项 然后把它的selected修改为传过来的selected
+      const item = cartList.value.find((item) => item.skuId === skuId);
+      item.selected = selected;
+    };
+
+    // 计算属性
+    // 1.总的数量 所有项的count之和
+    const allCount = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count, 0)
+    );
+    // 2.总价 所有项的count*price之和
+    const allPrice = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count * c.price, 0)
+    );
+    //   3.已选择数量
+    const selectedCount = computed(() =>
+      cartList.value
+        .filter((item) => item.selected)
+        .reduce((a, c) => a + c.count, 0)
+    );
+
+    //   4.已选择商品价钱合计
+    const selectedPrice = computed(() =>
+      cartList.value
+        .filter((item) => item.selected)
+        .reduce((a, c) => a + c.count * c.price, 0)
+    );
+    //是否全选
+    const isAll = computed(() => cartList.value.every((item) => item.selected));
+
+    //全选功能
+    const allCheck = (selected) => {
+      //把cartList中的每一项的selected都设置为当前的全选框状态
+      cartList.value.forEach((item) => (item.selected = selected));
+    };
+    return {
+      cartList,
+      addCart,
+      delCart,
+      allCount,
+      allPrice,
+      singleCheck,
+      isAll,
+      allCheck,
+      selectedCount,
+      selectedPrice,
+    };
+  },
+  {
+    persist: true,
+  }
+);
+
+```
+
+### 退出登录-清空购物车
+
+stores/cartStore.js
+
+```JavaScript
+// 封装购物车模块
+
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import { useUserStore } from "./userStore";
+import { insertCartAPI, findNewCartListAPI, delCartAPI } from "@/apis/cart";
+export const useCartStore = defineStore(
+  "cart",
+  () => {
+    const userStore = useUserStore();
+    const isLogin = computed(() => userStore.userInfo.token);
+    // 1.定义state - cartList
+    const cartList = ref([]);
+    // 2.定义action - addCart
+    const addCart = async (goods) => {
+      const { skuId, count } = goods;
+      if (isLogin.value) {
+        //登录之后的加入购物车逻辑
+        await insertCartAPI({ skuId, count });
+        updateNewList();
+      } else {
+        //添加购物车操作
+        // 已经添加过 - count + 1
+        // 没有添加过 -直接push
+        // 思路：通过匹配传递过来的商品对象中的skuId能不能在cartList中找到，找到了就是添加过
+        const item = cartList.value.find((item) => goods.skuId === item.skuId);
+        if (item) {
+          //找到了
+          item.count++;
+        } else {
+          //没找到
+          cartList.value.push(goods);
+        }
+      }
+    };
+    //删除购物车
+    const delCart = async (skuId) => {
+      if (isLogin.value) {
+        //调用接口实现接口购物车中的删除功能
+        await delCartAPI([skuId]);
+        updateNewList();
+      } else {
+        // 思路
+        // 1.找到要删除项的下标值 - splice
+        // 2.使用数组的过滤方法 - filter
+        const idx = cartList.value.findIndex((item) => skuId === item.skuId);
+        cartList.value.splice(idx, 1);
+      }
+    };
+
+    // 清除购物车
+      const clearCart = () => {
+        cartList.value = []
+    }
+    //   获取最新购物车列表action
+    const updateNewList = async () => {
+      const res = await findNewCartListAPI();
+      cartList.value = res.result;
+    };
+    //   单选功能
+    const singleCheck = (skuId, selected) => {
+      //   通过skuId找到要修改的那一项 然后把它的selected修改为传过来的selected
+      const item = cartList.value.find((item) => item.skuId === skuId);
+      item.selected = selected;
+    };
+
+    // 计算属性
+    // 1.总的数量 所有项的count之和
+    const allCount = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count, 0)
+    );
+    // 2.总价 所有项的count*price之和
+    const allPrice = computed(() =>
+      cartList.value.reduce((a, c) => a + c.count * c.price, 0)
+    );
+    //   3.已选择数量
+    const selectedCount = computed(() =>
+      cartList.value
+        .filter((item) => item.selected)
+        .reduce((a, c) => a + c.count, 0)
+    );
+
+    //   4.已选择商品价钱合计
+    const selectedPrice = computed(() =>
+      cartList.value
+        .filter((item) => item.selected)
+        .reduce((a, c) => a + c.count * c.price, 0)
+    );
+    //是否全选
+    const isAll = computed(() => cartList.value.every((item) => item.selected));
+
+    //全选功能
+    const allCheck = (selected) => {
+      //把cartList中的每一项的selected都设置为当前的全选框状态
+      cartList.value.forEach((item) => (item.selected = selected));
+    };
+    return {
+      cartList,
+      addCart,
+      delCart,
+      allCount,
+      allPrice,
+      singleCheck,
+      isAll,
+      allCheck,
+      selectedCount,
+      selectedPrice,
+      clearCart,
+    };
+  },
+  {
+    persist: true,
+  }
+);
+
+```
+
+stores/userStore.js
+
+```JavaScript
+// 管理用户数据相关
+
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import { loginAPI } from "@/apis/user";
+import { useCartStore } from "./cartStore";
+
+export const useUserStore = defineStore(
+  "user",
+    () => {
+      const cartStore = useCartStore()
+    // 1.定义管理用户数据的state
+    const userInfo = ref({});
+    // 2.定义获取接口数据的action函数
+    const getUserInfo = async ({ account, password }) => {
+      const res = await loginAPI({ account, password });
+      userInfo.value = res.result;
+    };
+    // 退出时清除用户信息
+    const clearUserInfo = () => {
+        userInfo.value = {};
+        // 执行清除购物车的action
+        cartStore.clearCart()
+    };
+    // 3.以对象的格式把state和action return
+    return {
+      userInfo,
+      getUserInfo,
+      clearUserInfo,
+    };
+  },
+  {
+    persist: true,
+  }
+);
+
+```
+
+### 合并本地购物车到服务器
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685708402202-fdae9726-6671-485c-811e-002d461fde9a.png#averageHue=%23f3f0ed&clientId=u2310c487-be9c-4&from=paste&height=594&id=u841c6077&originHeight=742&originWidth=1459&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=311306&status=done&style=none&taskId=u67b80b48-56f1-4f37-8990-409f2a45321&title=&width=1167.2)
+
+
+apis/cart.js
+
+```JavaScript
+// 封装购物车相关接口
+import request from '@/utils/http'
+
+// 加入购物车
+export const insertCartAPI = ({ skuId, count }) => {
+    return request({
+        url: '/member/cart',
+        method: 'POST',
+        data: {
+            skuId,
+            count
+        }
+    })
+}
+
+// 获取最新的购物车列表
+export const findNewCartListAPI = () => {
+    return request({
+        url:'/member/cart'
+    })
+}
+
+// 删除购物车
+export const delCartAPI = (ids) => {
+    return request({
+        url: '/member/cart',
+        method: 'DELETE',
+        data: {
+            ids
+        }
+    })
+}
+
+//合并购物车
+export const mergeCartAPI = (data) => {
+    return request({
+        url: '/member/cart/merge',
+        method: 'POST',
+        data
+    })
+}
+```
+
+stores/userStore.js
+
+```JavaScript
+// 管理用户数据相关
+
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import { loginAPI } from "@/apis/user";
+import { useCartStore } from "./cartStore";
+import { mergeCartAPI} from '@/apis/cart'
+export const useUserStore = defineStore(
+  "user",
+    () => {
+      const cartStore = useCartStore()
+    // 1.定义管理用户数据的state
+    const userInfo = ref({});
+    // 2.定义获取接口数据的action函数
+    const getUserInfo = async ({ account, password }) => {
+      const res = await loginAPI({ account, password });
+        userInfo.value = res.result;
+        //合并购物车的操作
+        await mergeCartAPI(cartStore.cartList.map(item => {
+            return {
+                skuId: item.skuId,
+                selected: item.selected,
+                count:item.count
+            }
+        }))
+        cartStore.updateNewList()
+    };
+    // 退出时清除用户信息
+    const clearUserInfo = () => {
+        userInfo.value = {};
+        // 执行清除购物车的action
+        cartStore.clearCart()
+    };
+    // 3.以对象的格式把state和action return
+    return {
+      userInfo,
+      getUserInfo,
+      clearUserInfo,
+    };
+  },
+  {
+    persist: true,
+  }
+);
+
+```
+
+### 结算-基础数据渲染与配置
+
+views/Checkout/index.vue
+
+```JavaScript
+<script setup>
+import { getCheckInfoAPI } from '@/apis/checkout';
+import {ref,onMounted} from 'vue'
+const checkInfo = ref({})  // 订单对象
+const curAddress = ref({})// 地址对象
+const getCheckInfo = async () => {
+    const res = await getCheckInfoAPI()
+    checkInfo.value = res.result
+    //适配默认地址
+    //从地址列表筛选出来    isDefault === 0 那一项
+    const item = checkInfo.value.userAddresses.find(item => item.isDefault === 0)
+    curAddress.value = item
+}
+onMounted(() => {
+    getCheckInfo()
+})
+
+</script>
+
+<template>
+    <div class="xtx-pay-checkout-page">
+        <div class="container">
+            <div class="wrapper">
+                <!-- 收货地址 -->
+                <h3 class="box-title">收货地址</h3>
+                <div class="box-body">
+                    <div class="address">
+                        <div class="text">
+                            <div class="none" v-if="!curAddress">您需要先添加收货地址才可提交订单。</div>
+                            <ul v-else>
+                                <li><span>收<i />货<i />人：</span>{{ curAddress.receiver }}</li>
+                                <li><span>联系方式：</span>{{ curAddress.contact }}</li>
+                                <li><span>收货地址：</span>{{ curAddress.fullLocation }} {{ curAddress.address }}</li>
+                            </ul>
+                        </div>
+                        <div class="action">
+                            <el-button size="large" @click="toggleFlag = true">切换地址</el-button>
+                            <el-button size="large" @click="addFlag = true">添加地址</el-button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 商品信息 -->
+                <h3 class="box-title">商品信息</h3>
+                <div class="box-body">
+                    <table class="goods">
+                        <thead>
+                            <tr>
+                                <th width="520">商品信息</th>
+                                <th width="170">单价</th>
+                                <th width="170">数量</th>
+                                <th width="170">小计</th>
+                                <th width="170">实付</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="i in checkInfo.goods" :key="i.id">
+                                <td>
+                                    <a href="javascript:;" class="info">
+                                        <img :src="i.picture" alt="">
+                                        <div class="right">
+                                            <p>{{ i.name }}</p>
+                                            <p>{{ i.attrsText }}</p>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td>&yen;{{ i.price }}</td>
+                                <td>{{ i.price }}</td>
+                                <td>&yen;{{ i.totalPrice }}</td>
+                                <td>&yen;{{ i.totalPayPrice }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 配送时间 -->
+                <h3 class="box-title">配送时间</h3>
+                <div class="box-body">
+                    <a class="my-btn active" href="javascript:;">不限送货时间：周一至周日</a>
+                    <a class="my-btn" href="javascript:;">工作日送货：周一至周五</a>
+                    <a class="my-btn" href="javascript:;">双休日、假日送货：周六至周日</a>
+                </div>
+                <!-- 支付方式 -->
+                <h3 class="box-title">支付方式</h3>
+                <div class="box-body">
+                    <a class="my-btn active" href="javascript:;">在线支付</a>
+                    <a class="my-btn" href="javascript:;">货到付款</a>
+                    <span style="color:#999">货到付款需付5元手续费</span>
+                </div>
+                <!-- 金额明细 -->
+                <h3 class="box-title">金额明细</h3>
+                <div class="box-body">
+                    <div class="total">
+                        <dl>
+                            <dt>商品件数：</dt>
+                            <dd>{{ checkInfo.summary?.goodsCount }}件</dd>
+                        </dl>
+                        <dl>
+                            <dt>商品总价：</dt>
+                            <dd>¥{{ checkInfo.summary?.totalPrice.toFixed(2) }}</dd>
+                        </dl>
+                        <dl>
+                            <dt>运<i></i>费：</dt>
+                            <dd>¥{{ checkInfo.summary?.postFee.toFixed(2) }}</dd>
+                        </dl>
+                        <dl>
+                            <dt>应付总额：</dt>
+                            <dd class="price">{{ checkInfo.summary?.totalPayPrice.toFixed(2) }}</dd>
+                        </dl>
+                    </div>
+                </div>
+                <!-- 提交订单 -->
+                <div class="submit">
+                    <el-button type="primary" size="large">提交订单</el-button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 切换地址 -->
+    <!-- 添加地址 -->
+</template>
+
+<style scoped lang="scss">
+.xtx-pay-checkout-page {
+    margin-top: 20px;
+
+    .wrapper {
+        background: #fff;
+        padding: 0 20px;
+
+        .box-title {
+            font-size: 16px;
+            font-weight: normal;
+            padding-left: 10px;
+            line-height: 70px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .box-body {
+            padding: 20px 0;
+        }
+    }
+}
+
+.address {
+    border: 1px solid #f5f5f5;
+    display: flex;
+    align-items: center;
+
+    .text {
+        flex: 1;
+        min-height: 90px;
+        display: flex;
+        align-items: center;
+
+        .none {
+            line-height: 90px;
+            color: #999;
+            text-align: center;
+            width: 100%;
+        }
+
+        >ul {
+            flex: 1;
+            padding: 20px;
+
+            li {
+                line-height: 30px;
+
+                span {
+                    color: #999;
+                    margin-right: 5px;
+
+                    >i {
+                        width: 0.5em;
+                        display: inline-block;
+                    }
+                }
+            }
+        }
+
+        >a {
+            color: $xtxColor;
+            width: 160px;
+            text-align: center;
+            height: 90px;
+            line-height: 90px;
+            border-right: 1px solid #f5f5f5;
+        }
+    }
+
+    .action {
+        width: 420px;
+        text-align: center;
+
+        .btn {
+            width: 140px;
+            height: 46px;
+            line-height: 44px;
+            font-size: 14px;
+
+            &:first-child {
+                margin-right: 10px;
+            }
+        }
+    }
+}
+
+.goods {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+
+    .info {
+        display: flex;
+        text-align: left;
+
+        img {
+            width: 70px;
+            height: 70px;
+            margin-right: 20px;
+        }
+
+        .right {
+            line-height: 24px;
+
+            p {
+                &:last-child {
+                    color: #999;
+                }
+            }
+        }
+    }
+
+    tr {
+        th {
+            background: #f5f5f5;
+            font-weight: normal;
+        }
+
+        td,
+        th {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid #f5f5f5;
+
+            &:first-child {
+                border-left: 1px solid #f5f5f5;
+            }
+
+            &:last-child {
+                border-right: 1px solid #f5f5f5;
+            }
+        }
+    }
+}
+
+.my-btn {
+    width: 228px;
+    height: 50px;
+    border: 1px solid #e4e4e4;
+    text-align: center;
+    line-height: 48px;
+    margin-right: 25px;
+    color: #666666;
+    display: inline-block;
+
+    &.active,
+    &:hover {
+        border-color: $xtxColor;
+    }
+}
+
+.total {
+    dl {
+        display: flex;
+        justify-content: flex-end;
+        line-height: 50px;
+
+        dt {
+            i {
+                display: inline-block;
+                width: 2em;
+            }
+        }
+
+        dd {
+            width: 240px;
+            text-align: right;
+            padding-right: 70px;
+
+            &.price {
+                font-size: 20px;
+                color: $priceColor;
+            }
+        }
+    }
+}
+
+.submit {
+    text-align: right;
+    padding: 60px;
+    border-top: 1px solid #f5f5f5;
+}
+
+.addressWrapper {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.text {
+    flex: 1;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+
+    &.item {
+        border: 1px solid #f5f5f5;
+        margin-bottom: 10px;
+        cursor: pointer;
+
+        &.active,
+        &:hover {
+            border-color: $xtxColor;
+            background: lighten($xtxColor, 50%);
+        }
+
+        >ul {
+            padding: 10px;
+            font-size: 14px;
+            line-height: 30px;
+        }
+    }
+}
+</style>
+```
+
+apis/checkout.js
+
+```JavaScript
+import request from '@/utils/http'
+
+// 获取详情接口
+export const getCheckInfoAPI = () => {
+    return request({
+        url:'/memeber/order/pre'
+    })
+} 
+```
+
+### 结算-切换地址
+
+views/Checkout/index.vue
+
+```JavaScript
+<script setup>
+import { getCheckInfoAPI } from '@/apis/checkout';
+import { ref, onMounted } from 'vue'
+const checkInfo = ref({})  // 订单对象
+const curAddress = ref({})// 地址对象
+const getCheckInfo = async () => {
+    const res = await getCheckInfoAPI()
+    checkInfo.value = res.result
+    //适配默认地址
+    //从地址列表筛选出来    isDefault === 0 那一项
+    const item = checkInfo.value.userAddresses.find(item => item.isDefault === 0)
+    curAddress.value = item
+}
+onMounted(() => {
+    getCheckInfo()
+})
+
+// 控制弹框打开
+const showDialog = ref(false)
+
+//切换地址
+const activeAddress = ref({})
+const switchAddress = (item) => {
+    activeAddress.value = item
+}
+const confirm = () => {
+    curAddress.value = activeAddress.value
+    showDialog.value = false
+    activeAddress.value = {}
+}
+</script>
+
+<template>
+    <div class="xtx-pay-checkout-page">
+        <div class="container">
+            <div class="wrapper">
+                <!-- 收货地址 -->
+                <h3 class="box-title">收货地址</h3>
+                <div class="box-body">
+                    <div class="address">
+                        <div class="text">
+                            <div class="none" v-if="!curAddress">您需要先添加收货地址才可提交订单。</div>
+                            <ul v-else>
+                                <li><span>收<i />货<i />人：</span>{{ curAddress.receiver }}</li>
+                                <li><span>联系方式：</span>{{ curAddress.contact }}</li>
+                                <li><span>收货地址：</span>{{ curAddress.fullLocation }} {{ curAddress.address }}</li>
+                            </ul>
+                        </div>
+                        <div class="action">
+                            <el-button size="large" @click="showDialog = true">切换地址</el-button>
+                            <el-button size="large" @click="addFlag = true">添加地址</el-button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 商品信息 -->
+                <h3 class="box-title">商品信息</h3>
+                <div class="box-body">
+                    <table class="goods">
+                        <thead>
+                            <tr>
+                                <th width="520">商品信息</th>
+                                <th width="170">单价</th>
+                                <th width="170">数量</th>
+                                <th width="170">小计</th>
+                                <th width="170">实付</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="i in checkInfo.goods" :key="i.id">
+                                <td>
+                                    <a href="javascript:;" class="info">
+                                        <img :src="i.picture" alt="">
+                                        <div class="right">
+                                            <p>{{ i.name }}</p>
+                                            <p>{{ i.attrsText }}</p>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td>&yen;{{ i.price }}</td>
+                                <td>{{ i.price }}</td>
+                                <td>&yen;{{ i.totalPrice }}</td>
+                                <td>&yen;{{ i.totalPayPrice }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 配送时间 -->
+                <h3 class="box-title">配送时间</h3>
+                <div class="box-body">
+                    <a class="my-btn active" href="javascript:;">不限送货时间：周一至周日</a>
+                    <a class="my-btn" href="javascript:;">工作日送货：周一至周五</a>
+                    <a class="my-btn" href="javascript:;">双休日、假日送货：周六至周日</a>
+                </div>
+                <!-- 支付方式 -->
+                <h3 class="box-title">支付方式</h3>
+                <div class="box-body">
+                    <a class="my-btn active" href="javascript:;">在线支付</a>
+                    <a class="my-btn" href="javascript:;">货到付款</a>
+                    <span style="color:#999">货到付款需付5元手续费</span>
+                </div>
+                <!-- 金额明细 -->
+                <h3 class="box-title">金额明细</h3>
+                <div class="box-body">
+                    <div class="total">
+                        <dl>
+                            <dt>商品件数：</dt>
+                            <dd>{{ checkInfo.summary?.goodsCount }}件</dd>
+                        </dl>
+                        <dl>
+                            <dt>商品总价：</dt>
+                            <dd>¥{{ checkInfo.summary?.totalPrice.toFixed(2) }}</dd>
+                        </dl>
+                        <dl>
+                            <dt>运<i></i>费：</dt>
+                            <dd>¥{{ checkInfo.summary?.postFee.toFixed(2) }}</dd>
+                        </dl>
+                        <dl>
+                            <dt>应付总额：</dt>
+                            <dd class="price">{{ checkInfo.summary?.totalPayPrice.toFixed(2) }}</dd>
+                        </dl>
+                    </div>
+                </div>
+                <!-- 提交订单 -->
+                <div class="submit">
+                    <el-button type="primary" size="large">提交订单</el-button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 切换地址 -->
+    <el-dialog v-model="showDialog" title="切换收货地址" width="30%" center>
+        <div class="addressWrapper">
+            <div class="text item" :class="{ active: activeAddress.id === item.id }" @click="switchAddress(item)"
+                v-for="item in checkInfo.userAddresses" :key="item.id">
+                <ul>
+                    <li><span>收<i />货<i />人：</span>{{ item.receiver }} </li>
+                    <li><span>联系方式：</span>{{ item.contact }}</li>
+                    <li><span>收货地址：</span>{{ item.fullLocation + item.address }}</li>
+                </ul>
+            </div>
+        </div>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button>取消</el-button>
+                <el-button type="primary" @click="confirm">确定</el-button>
+            </span>
+        </template>
+    </el-dialog>
+    <!-- 添加地址 -->
+</template>
+
+<style scoped lang="scss">
+.xtx-pay-checkout-page {
+    margin-top: 20px;
+
+    .wrapper {
+        background: #fff;
+        padding: 0 20px;
+
+        .box-title {
+            font-size: 16px;
+            font-weight: normal;
+            padding-left: 10px;
+            line-height: 70px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .box-body {
+            padding: 20px 0;
+        }
+    }
+}
+
+.address {
+    border: 1px solid #f5f5f5;
+    display: flex;
+    align-items: center;
+
+    .text {
+        flex: 1;
+        min-height: 90px;
+        display: flex;
+        align-items: center;
+
+        .none {
+            line-height: 90px;
+            color: #999;
+            text-align: center;
+            width: 100%;
+        }
+
+        >ul {
+            flex: 1;
+            padding: 20px;
+
+            li {
+                line-height: 30px;
+
+                span {
+                    color: #999;
+                    margin-right: 5px;
+
+                    >i {
+                        width: 0.5em;
+                        display: inline-block;
+                    }
+                }
+            }
+        }
+
+        >a {
+            color: $xtxColor;
+            width: 160px;
+            text-align: center;
+            height: 90px;
+            line-height: 90px;
+            border-right: 1px solid #f5f5f5;
+        }
+    }
+
+    .action {
+        width: 420px;
+        text-align: center;
+
+        .btn {
+            width: 140px;
+            height: 46px;
+            line-height: 44px;
+            font-size: 14px;
+
+            &:first-child {
+                margin-right: 10px;
+            }
+        }
+    }
+}
+
+.goods {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+
+    .info {
+        display: flex;
+        text-align: left;
+
+        img {
+            width: 70px;
+            height: 70px;
+            margin-right: 20px;
+        }
+
+        .right {
+            line-height: 24px;
+
+            p {
+                &:last-child {
+                    color: #999;
+                }
+            }
+        }
+    }
+
+    tr {
+        th {
+            background: #f5f5f5;
+            font-weight: normal;
+        }
+
+        td,
+        th {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid #f5f5f5;
+
+            &:first-child {
+                border-left: 1px solid #f5f5f5;
+            }
+
+            &:last-child {
+                border-right: 1px solid #f5f5f5;
+            }
+        }
+    }
+}
+
+.my-btn {
+    width: 228px;
+    height: 50px;
+    border: 1px solid #e4e4e4;
+    text-align: center;
+    line-height: 48px;
+    margin-right: 25px;
+    color: #666666;
+    display: inline-block;
+
+    &.active,
+    &:hover {
+        border-color: $xtxColor;
+    }
+}
+
+.total {
+    dl {
+        display: flex;
+        justify-content: flex-end;
+        line-height: 50px;
+
+        dt {
+            i {
+                display: inline-block;
+                width: 2em;
+            }
+        }
+
+        dd {
+            width: 240px;
+            text-align: right;
+            padding-right: 70px;
+
+            &.price {
+                font-size: 20px;
+                color: $priceColor;
+            }
+        }
+    }
+}
+
+.submit {
+    text-align: right;
+    padding: 60px;
+    border-top: 1px solid #f5f5f5;
+}
+
+.addressWrapper {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.text {
+    flex: 1;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+
+    &.item {
+        border: 1px solid #f5f5f5;
+        margin-bottom: 10px;
+        cursor: pointer;
+
+        &.active,
+        &:hover {
+            border-color: $xtxColor;
+            background: lighten($xtxColor, 50%);
+        }
+
+        >ul {
+            padding: 10px;
+            font-size: 14px;
+            line-height: 30px;
+        }
+    }
+}
+</style>
+```
+
+### 结算-生成订单
+
+apis/checkout.js
+
+```JavaScript
+import request from '@/utils/http'
+
+// 获取详情接口
+export const getCheckInfoAPI = () => {
+    return request({
+        url:'/member/order/pre'
+    })
+} 
+
+// 创建订单 
+export const createOrderAPI = (data) => {
+    return request({
+        url: '/member/order',
+        method: 'POST',
+        data
+    })
+}
+```
+
+views/Checkout/index.vue
+
+```JavaScript
+<script setup>
+import { getCheckInfoAPI, createOrderAPI } from '@/apis/checkout';
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useCartStore } from '@/stores/cartStore'
+const cartStore = useCartStore()
+const router = useRouter()
+const checkInfo = ref({})  // 订单对象
+const curAddress = ref({})// 地址对象
+const getCheckInfo = async () => {
+    const res = await getCheckInfoAPI()
+    checkInfo.value = res.result
+    //适配默认地址
+    //从地址列表筛选出来    isDefault === 0 那一项
+    const item = checkInfo.value.userAddresses.find(item => item.isDefault === 0)
+    curAddress.value = item
+}
+onMounted(() => {
+    getCheckInfo()
+})
+
+// 控制弹框打开
+const showDialog = ref(false)
+
+//切换地址
+const activeAddress = ref({})
+const switchAddress = (item) => {
+    activeAddress.value = item
+}
+const confirm = () => {
+    curAddress.value = activeAddress.value
+    showDialog.value = false
+    activeAddress.value = {}
+}
+
+//创建订单
+const createOrder = async () => {
+    const res = await createOrderAPI({
+        deliveryTimeType: 1,
+        payType: 1,
+        payChannel: 1,
+        buyerMessage: '',
+        goods: checkInfo.value.goods.map(item => {
+            return {
+                skuId: item.skuId,
+                count: item.count
+            }
+        }),
+        addressId: curAddress.value.id
+    })
+    const orderId = res.result.id
+    router.push({
+        path: '/pay',
+        query: {
+            id: orderId
+        }
+    })
+    //更新购物车
+    cartStore.updateNewList()
+}
+</script>
+
+<template>
+    <div class="xtx-pay-checkout-page">
+        <div class="container">
+            <div class="wrapper">
+                <!-- 收货地址 -->
+                <h3 class="box-title">收货地址</h3>
+                <div class="box-body">
+                    <div class="address">
+                        <div class="text">
+                            <div class="none" v-if="!curAddress">您需要先添加收货地址才可提交订单。</div>
+                            <ul v-else>
+                                <li><span>收<i />货<i />人：</span>{{ curAddress.receiver }}</li>
+                                <li><span>联系方式：</span>{{ curAddress.contact }}</li>
+                                <li><span>收货地址：</span>{{ curAddress.fullLocation }} {{ curAddress.address }}</li>
+                            </ul>
+                        </div>
+                        <div class="action">
+                            <el-button size="large" @click="showDialog = true">切换地址</el-button>
+                            <el-button size="large" @click="addFlag = true">添加地址</el-button>
+                        </div>
+                    </div>
+                </div>
+                <!-- 商品信息 -->
+                <h3 class="box-title">商品信息</h3>
+                <div class="box-body">
+                    <table class="goods">
+                        <thead>
+                            <tr>
+                                <th width="520">商品信息</th>
+                                <th width="170">单价</th>
+                                <th width="170">数量</th>
+                                <th width="170">小计</th>
+                                <th width="170">实付</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="i in checkInfo.goods" :key="i.id">
+                                <td>
+                                    <a href="javascript:;" class="info">
+                                        <img :src="i.picture" alt="">
+                                        <div class="right">
+                                            <p>{{ i.name }}</p>
+                                            <p>{{ i.attrsText }}</p>
+                                        </div>
+                                    </a>
+                                </td>
+                                <td>&yen;{{ i.price }}</td>
+                                <td>{{ i.price }}</td>
+                                <td>&yen;{{ i.totalPrice }}</td>
+                                <td>&yen;{{ i.totalPayPrice }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- 配送时间 -->
+                <h3 class="box-title">配送时间</h3>
+                <div class="box-body">
+                    <a class="my-btn active" href="javascript:;">不限送货时间：周一至周日</a>
+                    <a class="my-btn" href="javascript:;">工作日送货：周一至周五</a>
+                    <a class="my-btn" href="javascript:;">双休日、假日送货：周六至周日</a>
+                </div>
+                <!-- 支付方式 -->
+                <h3 class="box-title">支付方式</h3>
+                <div class="box-body">
+                    <a class="my-btn active" href="javascript:;">在线支付</a>
+                    <a class="my-btn" href="javascript:;">货到付款</a>
+                    <span style="color:#999">货到付款需付5元手续费</span>
+                </div>
+                <!-- 金额明细 -->
+                <h3 class="box-title">金额明细</h3>
+                <div class="box-body">
+                    <div class="total">
+                        <dl>
+                            <dt>商品件数：</dt>
+                            <dd>{{ checkInfo.summary?.goodsCount }}件</dd>
+                        </dl>
+                        <dl>
+                            <dt>商品总价：</dt>
+                            <dd>¥{{ checkInfo.summary?.totalPrice.toFixed(2) }}</dd>
+                        </dl>
+                        <dl>
+                            <dt>运<i></i>费：</dt>
+                            <dd>¥{{ checkInfo.summary?.postFee.toFixed(2) }}</dd>
+                        </dl>
+                        <dl>
+                            <dt>应付总额：</dt>
+                            <dd class="price">{{ checkInfo.summary?.totalPayPrice.toFixed(2) }}</dd>
+                        </dl>
+                    </div>
+                </div>
+                <!-- 提交订单 -->
+                <div class="submit">
+                    <el-button type="primary" size="large" @click="createOrder">提交订单</el-button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 切换地址 -->
+    <el-dialog v-model="showDialog" title="切换收货地址" width="30%" center>
+        <div class="addressWrapper">
+            <div class="text item" :class="{ active: activeAddress.id === item.id }" @click="switchAddress(item)"
+                v-for="item in checkInfo.userAddresses" :key="item.id">
+                <ul>
+                    <li><span>收<i />货<i />人：</span>{{ item.receiver }} </li>
+                    <li><span>联系方式：</span>{{ item.contact }}</li>
+                    <li><span>收货地址：</span>{{ item.fullLocation + item.address }}</li>
+                </ul>
+            </div>
+        </div>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button>取消</el-button>
+                <el-button type="primary" @click="confirm">确定</el-button>
+            </span>
+        </template>
+    </el-dialog>
+    <!-- 添加地址 -->
+</template>
+
+<style scoped lang="scss">
+.xtx-pay-checkout-page {
+    margin-top: 20px;
+
+    .wrapper {
+        background: #fff;
+        padding: 0 20px;
+
+        .box-title {
+            font-size: 16px;
+            font-weight: normal;
+            padding-left: 10px;
+            line-height: 70px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .box-body {
+            padding: 20px 0;
+        }
+    }
+}
+
+.address {
+    border: 1px solid #f5f5f5;
+    display: flex;
+    align-items: center;
+
+    .text {
+        flex: 1;
+        min-height: 90px;
+        display: flex;
+        align-items: center;
+
+        .none {
+            line-height: 90px;
+            color: #999;
+            text-align: center;
+            width: 100%;
+        }
+
+        >ul {
+            flex: 1;
+            padding: 20px;
+
+            li {
+                line-height: 30px;
+
+                span {
+                    color: #999;
+                    margin-right: 5px;
+
+                    >i {
+                        width: 0.5em;
+                        display: inline-block;
+                    }
+                }
+            }
+        }
+
+        >a {
+            color: $xtxColor;
+            width: 160px;
+            text-align: center;
+            height: 90px;
+            line-height: 90px;
+            border-right: 1px solid #f5f5f5;
+        }
+    }
+
+    .action {
+        width: 420px;
+        text-align: center;
+
+        .btn {
+            width: 140px;
+            height: 46px;
+            line-height: 44px;
+            font-size: 14px;
+
+            &:first-child {
+                margin-right: 10px;
+            }
+        }
+    }
+}
+
+.goods {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+
+    .info {
+        display: flex;
+        text-align: left;
+
+        img {
+            width: 70px;
+            height: 70px;
+            margin-right: 20px;
+        }
+
+        .right {
+            line-height: 24px;
+
+            p {
+                &:last-child {
+                    color: #999;
+                }
+            }
+        }
+    }
+
+    tr {
+        th {
+            background: #f5f5f5;
+            font-weight: normal;
+        }
+
+        td,
+        th {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid #f5f5f5;
+
+            &:first-child {
+                border-left: 1px solid #f5f5f5;
+            }
+
+            &:last-child {
+                border-right: 1px solid #f5f5f5;
+            }
+        }
+    }
+}
+
+.my-btn {
+    width: 228px;
+    height: 50px;
+    border: 1px solid #e4e4e4;
+    text-align: center;
+    line-height: 48px;
+    margin-right: 25px;
+    color: #666666;
+    display: inline-block;
+
+    &.active,
+    &:hover {
+        border-color: $xtxColor;
+    }
+}
+
+.total {
+    dl {
+        display: flex;
+        justify-content: flex-end;
+        line-height: 50px;
+
+        dt {
+            i {
+                display: inline-block;
+                width: 2em;
+            }
+        }
+
+        dd {
+            width: 240px;
+            text-align: right;
+            padding-right: 70px;
+
+            &.price {
+                font-size: 20px;
+                color: $priceColor;
+            }
+        }
+    }
+}
+
+.submit {
+    text-align: right;
+    padding: 60px;
+    border-top: 1px solid #f5f5f5;
+}
+
+.addressWrapper {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.text {
+    flex: 1;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+
+    &.item {
+        border: 1px solid #f5f5f5;
+        margin-bottom: 10px;
+        cursor: pointer;
+
+        &.active,
+        &:hover {
+            border-color: $xtxColor;
+            background: lighten($xtxColor, 50%);
+        }
+
+        >ul {
+            padding: 10px;
+            font-size: 14px;
+            line-height: 30px;
+        }
+    }
+}
+</style>
+```
+
+### 支付-基础数据渲染
+
+Pay/index.vue
+
+```JavaScript
+<script setup>
+import { getOrderAPI } from 'vue'
+import { ref ,onMounted} from 'vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const payInfo = ref({})
+const getPayInfo = async () => {
+    const res = await getOrderAPI(route.query.id)
+    payInfo.value = res.result
+}
+onMounted(() => {
+    getPayInfo()
+})
+</script>
+
+
+<template>
+    <div class="xtx-pay-page">
+        <div class="container">
+            <!-- 付款信息 -->
+            <div class="pay-info">
+                <span class="icon iconfont icon-queren2"></span>
+                <div class="tip">
+                    <p>订单提交成功！请尽快完成支付。</p>
+                    <p>支付还剩 <span>24分30秒</span>, 超时后将取消订单</p>
+                </div>
+                <div class="amount">
+                    <span>应付总额：</span>
+                    <span>¥{{ payInfo.payMoney?.toFixed(2) }}</span>
+                </div>
+            </div>
+            <!-- 付款方式 -->
+            <div class="pay-type">
+                <p class="head">选择以下支付方式付款</p>
+                <div class="item">
+                    <p>支付平台</p>
+                    <a class="btn wx" href="javascript:;"></a>
+                    <a class="btn alipay" :href="payUrl"></a>
+                </div>
+                <div class="item">
+                    <p>支付方式</p>
+                    <a class="btn" href="javascript:;">招商银行</a>
+                    <a class="btn" href="javascript:;">工商银行</a>
+                    <a class="btn" href="javascript:;">建设银行</a>
+                    <a class="btn" href="javascript:;">农业银行</a>
+                    <a class="btn" href="javascript:;">交通银行</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.xtx-pay-page {
+    margin-top: 20px;
+}
+
+.pay-info {
+
+    background: #fff;
+    display: flex;
+    align-items: center;
+    height: 240px;
+    padding: 0 80px;
+
+    .icon {
+        font-size: 80px;
+        color: #1dc779;
+    }
+
+    .tip {
+        padding-left: 10px;
+        flex: 1;
+
+        p {
+            &:first-child {
+                font-size: 20px;
+                margin-bottom: 5px;
+            }
+
+            &:last-child {
+                color: #999;
+                font-size: 16px;
+            }
+        }
+    }
+
+    .amount {
+        span {
+            &:first-child {
+                font-size: 16px;
+                color: #999;
+            }
+
+            &:last-child {
+                color: $priceColor;
+                font-size: 20px;
+            }
+        }
+    }
+}
+
+.pay-type {
+    margin-top: 20px;
+    background-color: #fff;
+    padding-bottom: 70px;
+
+    p {
+        line-height: 70px;
+        height: 70px;
+        padding-left: 30px;
+        font-size: 16px;
+
+        &.head {
+            border-bottom: 1px solid #f5f5f5;
+        }
+    }
+
+    .btn {
+        width: 150px;
+        height: 50px;
+        border: 1px solid #e4e4e4;
+        text-align: center;
+        line-height: 48px;
+        margin-left: 30px;
+        color: #666666;
+        display: inline-block;
+
+        &.active,
+        &:hover {
+            border-color: $xtxColor;
+        }
+
+        &.alipay {
+            background: url(https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/7b6b02396368c9314528c0bbd85a2e06.png) no-repeat center / contain;
+        }
+
+        &.wx {
+            background: url(https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/c66f98cff8649bd5ba722c2e8067c6ca.jpg) no-repeat center / contain;
+        }
+    }
+}
+</style>
+```
+
+apis/pay.js
+
+```JavaScript
+import request from '@/utils/http'
+
+export const getOrderAPI = (id) => {
+    return request({
+        url:`/member/order/${id}`
+    })
+}
+```
+
+### 支付-实现支付功能
+
+![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685719904732-a4b5f0fb-9485-45f7-ba76-76ce6464577f.png#averageHue=%23f2934f&clientId=u2310c487-be9c-4&from=paste&height=581&id=ueb2bd7ce&originHeight=726&originWidth=1559&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=185857&status=done&style=none&taskId=u8a5dd54e-4e09-4c33-af22-299d8318a81&title=&width=1247.2)
+
+
+Pay/PayBack.vue
+
+```JavaScript
+<script setup>
+import { getOrderAPI } from '@/apis/pay'
+import { onMounted, ref } from 'vue'
+import { useRoute } from 'vue-router'
+const route = useRoute()
+const orderInfo = ref({})
+const getOrderInfo = async () => {
+    const res = await getOrderAPI(route.query.orderId)
+    orderInfo.value = res.result
+}
+onMounted(() => getOrderInfo() )
+</script>
+
+
+<template>
+    <div class="xtx-pay-page">
+        <div class="container">
+            <!-- 支付结果 -->
+            <div class="pay-result">
+                <!-- 路由参数获取到的是字符串而不是布尔值 -->
+                <span class="iconfont icon-queren2 green" v-if="$route.query.payResult === 'true'"></span>
+                <span class="iconfont icon-shanchu red" v-else></span>
+                <p class="tit">支付{{ $route.query.payResult === 'true' ? '成功':'失败'}}</p>
+                <p class="tip">我们将尽快为您发货，收货期间请保持手机畅通</p>
+                <p>支付方式：<span>支付宝</span></p>
+                <p>支付金额：<span>¥{{orderInfo.payMoney?.toFixed(2)}}</span></p>
+                <div class="btn">
+                    <el-button type="primary" style="margin-right:20px">查看订单</el-button>
+                    <el-button>进入首页</el-button>
+                </div>
+                <p class="alert">
+                    <span class="iconfont icon-tip"></span>
+                    温馨提示：小兔鲜儿不会以订单异常、系统升级为由要求您点击任何网址链接进行退款操作，保护资产、谨慎操作。
+                </p>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.pay-result {
+    padding: 100px 0;
+    background: #fff;
+    text-align: center;
+    margin-top: 20px;
+
+    >.iconfont {
+        font-size: 100px;
+    }
+
+    .green {
+        color: #1dc779;
+    }
+
+    .red {
+        color: $priceColor;
+    }
+
+    .tit {
+        font-size: 24px;
+    }
+
+    .tip {
+        color: #999;
+    }
+
+    p {
+        line-height: 40px;
+        font-size: 16px;
+    }
+
+    .btn {
+        margin-top: 50px;
+    }
+
+    .alert {
+        font-size: 12px;
+        color: #999;
+        margin-top: 50px;
+    }
+}
+</style> 
+```
+
+### 支付-封装倒计时函数
+
+composables/useCountDown.js
+
+```JavaScript
+// 封装倒计时逻辑函数
+import { ref, computed, onUnmounted } from "vue";
+import dayjs from "dayjs";
+export const useCountDown = () => {
+  // 1.响应式的数据
+  let timer = null;
+  const time = ref(0);
+  // 格式化时间 为xx分xx秒
+  const formatTime = computed(() => dayjs.unix(time.value).format("mm分ss秒"));
+  // 2.开启倒计时的函数
+  const start = (currentTime) => {
+    // 开始倒计时的逻辑
+    // 核心逻辑的编写：每隔1s就减一
+    time.value = currentTime;
+    timer = setInterval(() => {
+      time.value--;
+    }, 1000);
+  };
+  onUnmounted(() => {
+    timer && clearInterval(timer);
+  });
+  return {
+    formatTime,
+    start,
+  };
+};
+
+```
+
+Pay/index.vue
+
+```JavaScript
+<script setup>
+import { getOrderAPI } from '@/apis/pay'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useCountDown } from '@/composables/useCountDown';
+const { formatTime, start } = useCountDown()
+const route = useRoute()
+const payInfo = ref({})
+const getPayInfo = async () => {
+    const res = await getOrderAPI(route.query.id)
+    payInfo.value = res.result
+    // 初始化倒计时秒数
+    start(res.result.countdown)
+}
+onMounted(() => {
+    getPayInfo()
+})
+
+// 跳转支付
+// 携带订单id以及回调地址跳转到支付地址
+// 支付地址
+const baseURL = 'http://pcapi-xiaotuxian-front-devtest.itheima.net/'
+const backURL = 'http://127.0.0.1:5173/paycallback'
+const redirectUrl = encodeURIComponent(backURL)
+const payUrl = `${baseURL}pay/aliPay?orderId=${route.query.id}&redirect=${redirectUrl}`
+
+</script>
+
+
+<template>
+    <div class="xtx-pay-page">
+        <div class="container">
+            <!-- 付款信息 -->
+            <div class="pay-info">
+                <span class="icon iconfont icon-queren2"></span>
+                <div class="tip">
+                    <p>订单提交成功！请尽快完成支付。</p>
+                    <p>支付还剩 <span>{{ formatTime }}</span>, 超时后将取消订单</p>
+                </div>
+                <div class="amount">
+                    <span>应付总额：</span>
+                    <span>¥{{ payInfo.payMoney?.toFixed(2) }}</span>
+                </div>
+            </div>
+            <!-- 付款方式 -->
+            <div class="pay-type">
+                <p class="head">选择以下支付方式付款</p>
+                <div class="item">
+                    <p>支付平台</p>
+                    <a class="btn wx" href="javascript:;"></a>
+                    <a class="btn alipay" :href="payUrl"></a>
+                </div>
+                <div class="item">
+                    <p>支付方式</p>
+                    <a class="btn" href="javascript:;">招商银行</a>
+                    <a class="btn" href="javascript:;">工商银行</a>
+                    <a class="btn" href="javascript:;">建设银行</a>
+                    <a class="btn" href="javascript:;">农业银行</a>
+                    <a class="btn" href="javascript:;">交通银行</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.xtx-pay-page {
+    margin-top: 20px;
+}
+
+.pay-info {
+
+    background: #fff;
+    display: flex;
+    align-items: center;
+    height: 240px;
+    padding: 0 80px;
+
+    .icon {
+        font-size: 80px;
+        color: #1dc779;
+    }
+
+    .tip {
+        padding-left: 10px;
+        flex: 1;
+
+        p {
+            &:first-child {
+                font-size: 20px;
+                margin-bottom: 5px;
+            }
+
+            &:last-child {
+                color: #999;
+                font-size: 16px;
+            }
+        }
+    }
+
+    .amount {
+        span {
+            &:first-child {
+                font-size: 16px;
+                color: #999;
+            }
+
+            &:last-child {
+                color: $priceColor;
+                font-size: 20px;
+            }
+        }
+    }
+}
+
+.pay-type {
+    margin-top: 20px;
+    background-color: #fff;
+    padding-bottom: 70px;
+
+    p {
+        line-height: 70px;
+        height: 70px;
+        padding-left: 30px;
+        font-size: 16px;
+
+        &.head {
+            border-bottom: 1px solid #f5f5f5;
+        }
+    }
+
+    .btn {
+        width: 150px;
+        height: 50px;
+        border: 1px solid #e4e4e4;
+        text-align: center;
+        line-height: 48px;
+        margin-left: 30px;
+        color: #666666;
+        display: inline-block;
+
+        &.active,
+        &:hover {
+            border-color: $xtxColor;
+        }
+
+        &.alipay {
+            background: url(https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/7b6b02396368c9314528c0bbd85a2e06.png) no-repeat center / contain;
+        }
+
+        &.wx {
+            background: url(https://cdn.cnbj1.fds.api.mi-img.com/mi-mall/c66f98cff8649bd5ba722c2e8067c6ca.jpg) no-repeat center / contain;
+        }
+    }
+}
+</style>
+```
+
+### 会员中心-路由配置
+
+Member/components/UserInfo.vue
+
+```JavaScript
+<script setup>
+const userStore = {}
+</script>
+
+<template>
+    <div class="home-overview">
+        <!-- 用户信息 -->
+        <div class="user-meta">
+            <div class="avatar">
+                <img :src="userStore.userInfo?.avatar" />
+            </div>
+            <h4>{{ userStore.userInfo?.account }}</h4>
+        </div>
+        <div class="item">
+            <a href="javascript:;">
+                <span class="iconfont icon-hy"></span>
+                <p>会员中心</p>
+            </a>
+            <a href="javascript:;">
+                <span class="iconfont icon-aq"></span>
+                <p>安全设置</p>
+            </a>
+            <a href="javascript:;">
+                <span class="iconfont icon-dw"></span>
+                <p>地址管理</p>
+            </a>
+        </div>
+    </div>
+    <div class="like-container">
+        <div class="home-panel">
+            <div class="header">
+                <h4 data-v-bcb266e0="">猜你喜欢</h4>
+            </div>
+            <div class="goods-list">
+                <!-- <GoodsItem v-for="good in likeList" :key="good.id" :good="good" /> -->
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.home-overview {
+    height: 132px;
+    background: url(@/assets/images/center-bg.png) no-repeat center / cover;
+    display: flex;
+
+    .user-meta {
+        flex: 1;
+        display: flex;
+        align-items: center;
+
+        .avatar {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-left: 60px;
+
+            img {
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        h4 {
+            padding-left: 26px;
+            font-size: 18px;
+            font-weight: normal;
+            color: white;
+        }
+    }
+
+    .item {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+
+        &:first-child {
+            border-right: 1px solid #f4f4f4;
+        }
+
+        a {
+            color: white;
+            font-size: 16px;
+            text-align: center;
+
+            .iconfont {
+                font-size: 32px;
+            }
+
+            p {
+                line-height: 32px;
+            }
+        }
+    }
+}
+
+.like-container {
+    margin-top: 20px;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.home-panel {
+    background-color: #fff;
+    padding: 0 20px;
+    margin-top: 20px;
+    height: 400px;
+
+    .header {
+        height: 66px;
+        border-bottom: 1px solid #f5f5f5;
+        padding: 18px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+
+        h4 {
+            font-size: 22px;
+            font-weight: 400;
+        }
+
+    }
+
+    .goods-list {
+        display: flex;
+        justify-content: space-around;
+    }
+}
+</style>
+```
+
+Member/components/UserOrder.vue
+
+```JavaScript
+<script setup>
+// tab列表
+const tabTypes = [
+    { name: "all", label: "全部订单" },
+    { name: "unpay", label: "待付款" },
+    { name: "deliver", label: "待发货" },
+    { name: "receive", label: "待收货" },
+    { name: "comment", label: "待评价" },
+    { name: "complete", label: "已完成" },
+    { name: "cancel", label: "已取消" }
+]
+// 订单列表
+const orderList = []
+
+</script>
+
+<template>
+    <div class="order-container">
+        <el-tabs>
+            <!-- tab切换 -->
+            <el-tab-pane v-for="item in tabTypes" :key="item.name" :label="item.label" />
+
+            <div class="main-container">
+                <div class="holder-container" v-if="orderList.length === 0">
+                    <el-empty description="暂无订单数据" />
+                </div>
+                <div v-else>
+                    <!-- 订单列表 -->
+                    <div class="order-item" v-for="order in orderList" :key="order.id">
+                        <div class="head">
+                            <span>下单时间：{{ order.createTime }}</span>
+                            <span>订单编号：{{ order.id }}</span>
+                            <!-- 未付款，倒计时时间还有 -->
+                            <span class="down-time" v-if="order.orderState === 1">
+                                <i class="iconfont icon-down-time"></i>
+                                <b>付款截止: {{ order.countdown }}</b>
+                            </span>
+                        </div>
+                        <div class="body">
+                            <div class="column goods">
+                                <ul>
+                                    <li v-for="item in order.skus" :key="item.id">
+                                        <a class="image" href="javascript:;">
+                                            <img :src="item.image" alt="" />
+                                        </a>
+                                        <div class="info">
+                                            <p class="name ellipsis-2">
+                                                {{ item.name }}
+                                            </p>
+                                            <p class="attr ellipsis">
+                                                <span>{{ item.attrsText }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="price">¥{{ item.realPay?.toFixed(2) }}</div>
+                                        <div class="count">x{{ item.quantity }}</div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="column state">
+                                <p>{{ order.orderState }}</p>
+                                <p v-if="order.orderState === 3">
+                                    <a href="javascript:;" class="green">查看物流</a>
+                                </p>
+                                <p v-if="order.orderState === 4">
+                                    <a href="javascript:;" class="green">评价商品</a>
+                                </p>
+                                <p v-if="order.orderState === 5">
+                                    <a href="javascript:;" class="green">查看评价</a>
+                                </p>
+                            </div>
+                            <div class="column amount">
+                                <p class="red">¥{{ order.payMoney?.toFixed(2) }}</p>
+                                <p>（含运费：¥{{ order.postFee?.toFixed(2) }}）</p>
+                                <p>在线支付</p>
+                            </div>
+                            <div class="column action">
+                                <el-button v-if="order.orderState === 1" type="primary" size="small">
+                                    立即付款
+                                </el-button>
+                                <el-button v-if="order.orderState === 3" type="primary" size="small">
+                                    确认收货
+                                </el-button>
+                                <p><a href="javascript:;">查看详情</a></p>
+                                <p v-if="[2, 3, 4, 5].includes(order.orderState)">
+                                    <a href="javascript:;">再次购买</a>
+                                </p>
+                                <p v-if="[4, 5].includes(order.orderState)">
+                                    <a href="javascript:;">申请售后</a>
+                                </p>
+                                <p v-if="order.orderState === 1"><a href="javascript:;">取消订单</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 分页 -->
+                    <div class="pagination-container">
+                        <el-pagination background layout="prev, pager, next" />
+                    </div>
+                </div>
+            </div>
+
+        </el-tabs>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.order-container {
+    padding: 10px 20px;
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .main-container {
+        min-height: 500px;
+
+        .holder-container {
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}
+
+.order-item {
+    margin-bottom: 20px;
+    border: 1px solid #f5f5f5;
+
+    .head {
+        height: 50px;
+        line-height: 50px;
+        background: #f5f5f5;
+        padding: 0 20px;
+        overflow: hidden;
+
+        span {
+            margin-right: 20px;
+
+            &.down-time {
+                margin-right: 0;
+                float: right;
+
+                i {
+                    vertical-align: middle;
+                    margin-right: 3px;
+                }
+
+                b {
+                    vertical-align: middle;
+                    font-weight: normal;
+                }
+            }
+        }
+
+        .del {
+            margin-right: 0;
+            float: right;
+            color: #999;
+        }
+    }
+
+    .body {
+        display: flex;
+        align-items: stretch;
+
+        .column {
+            border-left: 1px solid #f5f5f5;
+            text-align: center;
+            padding: 20px;
+
+            >p {
+                padding-top: 10px;
+            }
+
+            &:first-child {
+                border-left: none;
+            }
+
+            &.goods {
+                flex: 1;
+                padding: 0;
+                align-self: center;
+
+                ul {
+                    li {
+                        border-bottom: 1px solid #f5f5f5;
+                        padding: 10px;
+                        display: flex;
+
+                        &:last-child {
+                            border-bottom: none;
+                        }
+
+                        .image {
+                            width: 70px;
+                            height: 70px;
+                            border: 1px solid #f5f5f5;
+                        }
+
+                        .info {
+                            width: 220px;
+                            text-align: left;
+                            padding: 0 10px;
+
+                            p {
+                                margin-bottom: 5px;
+
+                                &.name {
+                                    height: 38px;
+                                }
+
+                                &.attr {
+                                    color: #999;
+                                    font-size: 12px;
+
+                                    span {
+                                        margin-right: 5px;
+                                    }
+                                }
+                            }
+                        }
+
+                        .price {
+                            width: 100px;
+                        }
+
+                        .count {
+                            width: 80px;
+                        }
+                    }
+                }
+            }
+
+            &.state {
+                width: 120px;
+
+                .green {
+                    color: $xtxColor;
+                }
+            }
+
+            &.amount {
+                width: 200px;
+
+                .red {
+                    color: $priceColor;
+                }
+            }
+
+            &.action {
+                width: 140px;
+
+                a {
+                    display: block;
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+}
+</style>
+```
+
+Member/index.vue
+
+```JavaScript
+<script setup></script>
+
+<template>
+    <div class="container">
+        <div class="xtx-member-aside">
+            <div class="user-manage">
+                <h4>我的账户</h4>
+                <div class="links">
+                    <RouterLink to="/member/user">个人中心</RouterLink>
+                </div>
+                <h4>交易管理</h4>
+                <div class="links">
+                    <RouterLink to="/member/order">我的订单</RouterLink>
+                </div>
+            </div>
+        </div>
+        <div class="article">
+            <!-- 三级路由的挂载点 -->
+            <RouterView />
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.container {
+    display: flex;
+    padding-top: 20px;
+
+    .xtx-member-aside {
+        width: 220px;
+        margin-right: 20px;
+        border-radius: 2px;
+        background-color: #fff;
+
+        .user-manage {
+            background-color: #fff;
+
+            h4 {
+                font-size: 18px;
+                font-weight: 400;
+                padding: 20px 52px 5px;
+                border-top: 1px solid #f6f6f6;
+            }
+
+            .links {
+                padding: 0 52px 10px;
+            }
+
+            a {
+                display: block;
+                line-height: 1;
+                padding: 15px 0;
+                font-size: 14px;
+                color: #666;
+                position: relative;
+
+                &:hover {
+                    color: $xtxColor;
+                }
+
+                &.active,
+                &.router-link-exact-active {
+                    color: $xtxColor;
+
+                    &:before {
+                        display: block;
+                    }
+                }
+
+                &:before {
+                    content: '';
+                    display: none;
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    position: absolute;
+                    top: 19px;
+                    left: -16px;
+                    background-color: $xtxColor;
+                }
+            }
+        }
+    }
+
+    .article {
+        width: 1000px;
+        background-color: #fff;
+    }
+}
+</style>
+```
+
+### 会员中心-个人中心信息渲染
+
+apis/user.js
+
+```JavaScript
+//封装所有和用户相关的接口函数
+import request from "@/utils/http";
+
+export const loginAPI = ({account,password}) => {
+    return request({
+        url: '/login',
+        method: 'POST',
+        data: {
+            account,
+            password
+        }
+    })
+}   
+
+export const getLikeListAPI = ({ limit = 4 }) => {
+  return request({
+    url: "/goods/relevant",
+    params: {
+      limit,
+    },
+  });
+};
+```
+
+Member/components/UserInfo.vue
+
+```JavaScript
+<script setup>
+import { getLikeListAPI } from '@/apis/user'
+import { useUserStore } from '@/stores/userStore';
+import { ref, onMounted } from 'vue'
+import GoodsItem from '@/views/Home/components/GoodsItem.vue';
+const userStore = useUserStore()
+const likeList = ref([])
+const getLikeList = async () => {
+    const res = await getLikeListAPI({ limit: 4 })
+    likeList.value = res.result
+}
+onMounted(() => {
+    getLikeList()
+})
+</script>
+
+<template>
+    <div class="home-overview">
+        <!-- 用户信息 -->
+        <div class="user-meta">
+            <div class="avatar">
+                <img :src="userStore.userInfo?.avatar" />
+            </div>
+            <h4>{{ userStore.userInfo?.account }}</h4>
+        </div>
+        <div class="item">
+            <a href="javascript:;">
+                <span class="iconfont icon-hy"></span>
+                <p>会员中心</p>
+            </a>
+            <a href="javascript:;">
+                <span class="iconfont icon-aq"></span>
+                <p>安全设置</p>
+            </a>
+            <a href="javascript:;">
+                <span class="iconfont icon-dw"></span>
+                <p>地址管理</p>
+            </a>
+        </div>
+    </div>
+    <div class="like-container">
+        <div class="home-panel">
+            <div class="header">
+                <h4 data-v-bcb266e0="">猜你喜欢</h4>
+            </div>
+            <div class="goods-list">
+                <GoodsItem v-for="good in likeList" :key="good.id" :good="good" />
+            </div>
+        </div>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.home-overview {
+    height: 132px;
+    background: url(@/assets/images/center-bg.png) no-repeat center / cover;
+    display: flex;
+
+    .user-meta {
+        flex: 1;
+        display: flex;
+        align-items: center;
+
+        .avatar {
+            width: 85px;
+            height: 85px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-left: 60px;
+
+            img {
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        h4 {
+            padding-left: 26px;
+            font-size: 18px;
+            font-weight: normal;
+            color: white;
+        }
+    }
+
+    .item {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
+
+        &:first-child {
+            border-right: 1px solid #f4f4f4;
+        }
+
+        a {
+            color: white;
+            font-size: 16px;
+            text-align: center;
+
+            .iconfont {
+                font-size: 32px;
+            }
+
+            p {
+                line-height: 32px;
+            }
+        }
+    }
+}
+
+.like-container {
+    margin-top: 20px;
+    border-radius: 4px;
+    background-color: #fff;
+}
+
+.home-panel {
+    background-color: #fff;
+    padding: 0 20px;
+    margin-top: 20px;
+    height: 400px;
+
+    .header {
+        height: 66px;
+        border-bottom: 1px solid #f5f5f5;
+        padding: 18px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+
+        h4 {
+            font-size: 22px;
+            font-weight: 400;
+        }
+
+    }
+
+    .goods-list {
+        display: flex;
+        justify-content: space-around;
+    }
+}
+</style>
+```
+
+### 会员中心-我的订单实现
+
+apis/order.js
+
+```JavaScript
+import request from '@/utils/http'
+
+/*
+params: {
+	orderState:0,
+  page:1,
+  pageSize:2
+}
+*/
+
+
+export const getUserOrder = (params) => {
+  return request({
+    url:'/member/order',
+    method:'GET',
+    params
+  })
+}
+```
+
+Member/components/UserOrder.vue
+
+```JavaScript
+<script setup>
+import { getUserOrder } from '@/apis/order';
+import { ref , onMounted } from 'vue'
+// tab列表
+const tabTypes = [
+    { name: "all", label: "全部订单" },
+    { name: "unpay", label: "待付款" },
+    { name: "deliver", label: "待发货" },
+    { name: "receive", label: "待收货" },
+    { name: "comment", label: "待评价" },
+    { name: "complete", label: "已完成" },
+    { name: "cancel", label: "已取消" }
+]
+// 订单列表
+const orderList = ref([])
+const params = ref({
+    orderState: 0,
+    page: 1,
+    pageSize: 2
+})
+const getOrderList = async () => {
+    const res = await getUserOrder(params.value)
+    orderList.value = res.result.items
+}
+onMounted(() => {
+    getOrderList()
+})
+</script>
+
+<template>
+    <div class="order-container">
+        <el-tabs>
+            <!-- tab切换 -->
+            <el-tab-pane v-for="item in tabTypes" :key="item.name" :label="item.label" />
+
+            <div class="main-container">
+                <div class="holder-container" v-if="orderList.length === 0">
+                    <el-empty description="暂无订单数据" />
+                </div>
+                <div v-else>
+                    <!-- 订单列表 -->
+                    <div class="order-item" v-for="order in orderList" :key="order.id">
+                        <div class="head">
+                            <span>下单时间：{{ order.createTime }}</span>
+                            <span>订单编号：{{ order.id }}</span>
+                            <!-- 未付款，倒计时时间还有 -->
+                            <span class="down-time" v-if="order.orderState === 1">
+                                <i class="iconfont icon-down-time"></i>
+                                <b>付款截止: {{ order.countdown }}</b>
+                            </span>
+                        </div>
+                        <div class="body">
+                            <div class="column goods">
+                                <ul>
+                                    <li v-for="item in order.skus" :key="item.id">
+                                        <a class="image" href="javascript:;">
+                                            <img :src="item.image" alt="" />
+                                        </a>
+                                        <div class="info">
+                                            <p class="name ellipsis-2">
+                                                {{ item.name }}
+                                            </p>
+                                            <p class="attr ellipsis">
+                                                <span>{{ item.attrsText }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="price">¥{{ item.realPay?.toFixed(2) }}</div>
+                                        <div class="count">x{{ item.quantity }}</div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="column state">
+                                <p>{{ order.orderState }}</p>
+                                <p v-if="order.orderState === 3">
+                                    <a href="javascript:;" class="green">查看物流</a>
+                                </p>
+                                <p v-if="order.orderState === 4">
+                                    <a href="javascript:;" class="green">评价商品</a>
+                                </p>
+                                <p v-if="order.orderState === 5">
+                                    <a href="javascript:;" class="green">查看评价</a>
+                                </p>
+                            </div>
+                            <div class="column amount">
+                                <p class="red">¥{{ order.payMoney?.toFixed(2) }}</p>
+                                <p>（含运费：¥{{ order.postFee?.toFixed(2) }}）</p>
+                                <p>在线支付</p>
+                            </div>
+                            <div class="column action">
+                                <el-button v-if="order.orderState === 1" type="primary" size="small">
+                                    立即付款
+                                </el-button>
+                                <el-button v-if="order.orderState === 3" type="primary" size="small">
+                                    确认收货
+                                </el-button>
+                                <p><a href="javascript:;">查看详情</a></p>
+                                <p v-if="[2, 3, 4, 5].includes(order.orderState)">
+                                    <a href="javascript:;">再次购买</a>
+                                </p>
+                                <p v-if="[4, 5].includes(order.orderState)">
+                                    <a href="javascript:;">申请售后</a>
+                                </p>
+                                <p v-if="order.orderState === 1"><a href="javascript:;">取消订单</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 分页 -->
+                    <div class="pagination-container">
+                        <el-pagination background layout="prev, pager, next" />
+                    </div>
+                </div>
+            </div>
+
+        </el-tabs>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.order-container {
+    padding: 10px 20px;
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .main-container {
+        min-height: 500px;
+
+        .holder-container {
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}
+
+.order-item {
+    margin-bottom: 20px;
+    border: 1px solid #f5f5f5;
+
+    .head {
+        height: 50px;
+        line-height: 50px;
+        background: #f5f5f5;
+        padding: 0 20px;
+        overflow: hidden;
+
+        span {
+            margin-right: 20px;
+
+            &.down-time {
+                margin-right: 0;
+                float: right;
+
+                i {
+                    vertical-align: middle;
+                    margin-right: 3px;
+                }
+
+                b {
+                    vertical-align: middle;
+                    font-weight: normal;
+                }
+            }
+        }
+
+        .del {
+            margin-right: 0;
+            float: right;
+            color: #999;
+        }
+    }
+
+    .body {
+        display: flex;
+        align-items: stretch;
+
+        .column {
+            border-left: 1px solid #f5f5f5;
+            text-align: center;
+            padding: 20px;
+
+            >p {
+                padding-top: 10px;
+            }
+
+            &:first-child {
+                border-left: none;
+            }
+
+            &.goods {
+                flex: 1;
+                padding: 0;
+                align-self: center;
+
+                ul {
+                    li {
+                        border-bottom: 1px solid #f5f5f5;
+                        padding: 10px;
+                        display: flex;
+
+                        &:last-child {
+                            border-bottom: none;
+                        }
+
+                        .image {
+                            width: 70px;
+                            height: 70px;
+                            border: 1px solid #f5f5f5;
+                        }
+
+                        .info {
+                            width: 220px;
+                            text-align: left;
+                            padding: 0 10px;
+
+                            p {
+                                margin-bottom: 5px;
+
+                                &.name {
+                                    height: 38px;
+                                }
+
+                                &.attr {
+                                    color: #999;
+                                    font-size: 12px;
+
+                                    span {
+                                        margin-right: 5px;
+                                    }
+                                }
+                            }
+                        }
+
+                        .price {
+                            width: 100px;
+                        }
+
+                        .count {
+                            width: 80px;
+                        }
+                    }
+                }
+            }
+
+            &.state {
+                width: 120px;
+
+                .green {
+                    color: $xtxColor;
+                }
+            }
+
+            &.amount {
+                width: 200px;
+
+                .red {
+                    color: $priceColor;
+                }
+            }
+
+            &.action {
+                width: 140px;
+
+                a {
+                    display: block;
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+}
+</style>
+```
+
+### 会员中心-tab切换实现
+
+Member/components/UserOrder.vue
+
+```JavaScript
+<script setup>
+import { getUserOrder } from '@/apis/order';
+import { ref , onMounted } from 'vue'
+// tab列表
+const tabTypes = [
+    { name: "all", label: "全部订单" },
+    { name: "unpay", label: "待付款" },
+    { name: "deliver", label: "待发货" },
+    { name: "receive", label: "待收货" },
+    { name: "comment", label: "待评价" },
+    { name: "complete", label: "已完成" },
+    { name: "cancel", label: "已取消" }
+]
+// 订单列表
+const orderList = ref([])
+const params = ref({
+    orderState: 0,
+    page: 1,
+    pageSize: 2
+})
+const getOrderList = async () => {
+    const res = await getUserOrder(params.value)
+    orderList.value = res.result.items
+}
+onMounted(() => {
+    getOrderList()
+})
+
+//tab切换
+const tabChange = (type) => {
+    params.value.orderState = type
+    getOrderList()
+}
+</script>
+
+<template>
+    <div class="order-container">
+        <el-tabs @tab-change="tabChange">
+            <!-- tab切换 -->
+            <el-tab-pane v-for="item in tabTypes" :key="item.name" :label="item.label" />
+
+            <div class="main-container">
+                <div class="holder-container" v-if="orderList.length === 0">
+                    <el-empty description="暂无订单数据" />
+                </div>
+                <div v-else>
+                    <!-- 订单列表 -->
+                    <div class="order-item" v-for="order in orderList" :key="order.id">
+                        <div class="head">
+                            <span>下单时间：{{ order.createTime }}</span>
+                            <span>订单编号：{{ order.id }}</span>
+                            <!-- 未付款，倒计时时间还有 -->
+                            <span class="down-time" v-if="order.orderState === 1">
+                                <i class="iconfont icon-down-time"></i>
+                                <b>付款截止: {{ order.countdown }}</b>
+                            </span>
+                        </div>
+                        <div class="body">
+                            <div class="column goods">
+                                <ul>
+                                    <li v-for="item in order.skus" :key="item.id">
+                                        <a class="image" href="javascript:;">
+                                            <img :src="item.image" alt="" />
+                                        </a>
+                                        <div class="info">
+                                            <p class="name ellipsis-2">
+                                                {{ item.name }}
+                                            </p>
+                                            <p class="attr ellipsis">
+                                                <span>{{ item.attrsText }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="price">¥{{ item.realPay?.toFixed(2) }}</div>
+                                        <div class="count">x{{ item.quantity }}</div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="column state">
+                                <p>{{ order.orderState }}</p>
+                                <p v-if="order.orderState === 3">
+                                    <a href="javascript:;" class="green">查看物流</a>
+                                </p>
+                                <p v-if="order.orderState === 4">
+                                    <a href="javascript:;" class="green">评价商品</a>
+                                </p>
+                                <p v-if="order.orderState === 5">
+                                    <a href="javascript:;" class="green">查看评价</a>
+                                </p>
+                            </div>
+                            <div class="column amount">
+                                <p class="red">¥{{ order.payMoney?.toFixed(2) }}</p>
+                                <p>（含运费：¥{{ order.postFee?.toFixed(2) }}）</p>
+                                <p>在线支付</p>
+                            </div>
+                            <div class="column action">
+                                <el-button v-if="order.orderState === 1" type="primary" size="small">
+                                    立即付款
+                                </el-button>
+                                <el-button v-if="order.orderState === 3" type="primary" size="small">
+                                    确认收货
+                                </el-button>
+                                <p><a href="javascript:;">查看详情</a></p>
+                                <p v-if="[2, 3, 4, 5].includes(order.orderState)">
+                                    <a href="javascript:;">再次购买</a>
+                                </p>
+                                <p v-if="[4, 5].includes(order.orderState)">
+                                    <a href="javascript:;">申请售后</a>
+                                </p>
+                                <p v-if="order.orderState === 1"><a href="javascript:;">取消订单</a></p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 分页 -->
+                    <div class="pagination-container">
+                        <el-pagination background layout="prev, pager, next" />
+                    </div>
+                </div>
+            </div>
+
+        </el-tabs>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.order-container {
+    padding: 10px 20px;
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .main-container {
+        min-height: 500px;
+
+        .holder-container {
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}
+
+.order-item {
+    margin-bottom: 20px;
+    border: 1px solid #f5f5f5;
+
+    .head {
+        height: 50px;
+        line-height: 50px;
+        background: #f5f5f5;
+        padding: 0 20px;
+        overflow: hidden;
+
+        span {
+            margin-right: 20px;
+
+            &.down-time {
+                margin-right: 0;
+                float: right;
+
+                i {
+                    vertical-align: middle;
+                    margin-right: 3px;
+                }
+
+                b {
+                    vertical-align: middle;
+                    font-weight: normal;
+                }
+            }
+        }
+
+        .del {
+            margin-right: 0;
+            float: right;
+            color: #999;
+        }
+    }
+
+    .body {
+        display: flex;
+        align-items: stretch;
+
+        .column {
+            border-left: 1px solid #f5f5f5;
+            text-align: center;
+            padding: 20px;
+
+            >p {
+                padding-top: 10px;
+            }
+
+            &:first-child {
+                border-left: none;
+            }
+
+            &.goods {
+                flex: 1;
+                padding: 0;
+                align-self: center;
+
+                ul {
+                    li {
+                        border-bottom: 1px solid #f5f5f5;
+                        padding: 10px;
+                        display: flex;
+
+                        &:last-child {
+                            border-bottom: none;
+                        }
+
+                        .image {
+                            width: 70px;
+                            height: 70px;
+                            border: 1px solid #f5f5f5;
+                        }
+
+                        .info {
+                            width: 220px;
+                            text-align: left;
+                            padding: 0 10px;
+
+                            p {
+                                margin-bottom: 5px;
+
+                                &.name {
+                                    height: 38px;
+                                }
+
+                                &.attr {
+                                    color: #999;
+                                    font-size: 12px;
+
+                                    span {
+                                        margin-right: 5px;
+                                    }
+                                }
+                            }
+                        }
+
+                        .price {
+                            width: 100px;
+                        }
+
+                        .count {
+                            width: 80px;
+                        }
+                    }
+                }
+            }
+
+            &.state {
+                width: 120px;
+
+                .green {
+                    color: $xtxColor;
+                }
+            }
+
+            &.amount {
+                width: 200px;
+
+                .red {
+                    color: $priceColor;
+                }
+            }
+
+            &.action {
+                width: 140px;
+
+                a {
+                    display: block;
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+}
+</style>
+```
+
+### 会员中心-分页逻辑实现
+
+Member/components/UserOrder.vue
+
+```JavaScript
+<script setup>
+import { getUserOrder } from '@/apis/order';
+import { ref , onMounted } from 'vue'
+// tab列表
+const tabTypes = [<script setup>
+import { getUserOrder } from '@/apis/order';
+import { ref , onMounted } from 'vue'
+// tab列表
+const tabTypes = [
+    { name: "all", label: "全部订单" },
+    { name: "unpay", label: "待付款" },
+    { name: "deliver", label: "待发货" },
+    { name: "receive", label: "待收货" },
+    { name: "comment", label: "待评价" },
+    { name: "complete", label: "已完成" },
+    { name: "cancel", label: "已取消" }
+]
+// 订单列表
+const orderList = ref([])
+const total = ref(0)
+const params = ref({
+    orderState: 0,
+    page: 1,
+    pageSize: 2
+})
+const getOrderList = async () => {
+    const res = await getUserOrder(params.value)
+    orderList.value = res.result.items
+    total.value = res.result.counts
+}
+onMounted(() => {
+    getOrderList()
+})
+
+//tab切换
+const tabChange = (type) => {
+    params.value.orderState = type
+    getOrderList()
+}
+
+//页数切换
+const pageChange = (page) => {
+    params.value.page = page
+    getOrderList()
+}
+
+// 创建格式化函数
+const fomartPayState = (payState) => {
+    const stateMap = {
+        1: '待付款',
+        2: '待发货',
+        3: '待收货',
+        4: '待评价',
+        5: '已完成',
+        6: '已取消'
+    }
+    return stateMap[payState]
+}
+</script>
+
+<template>
+    <div class="order-container">
+        <el-tabs @tab-change="tabChange">
+            <!-- tab切换 -->
+            <el-tab-pane v-for="item in tabTypes" :key="item.name" :label="item.label" />
+
+            <div class="main-container">
+                <div class="holder-container" v-if="orderList.length === 0">
+                    <el-empty description="暂无订单数据" />
+                </div>
+                <div v-else>
+                    <!-- 订单列表 -->
+                    <div class="order-item" v-for="order in orderList" :key="order.id">
+                        <div class="head">
+                            <span>下单时间：{{ order.createTime }}</span>
+                            <span>订单编号：{{ order.id }}</span>
+                            <!-- 未付款，倒计时时间还有 -->
+                            <span class="down-time" v-if="order.orderState === 1">
+                                <i class="iconfont icon-down-time"></i>
+                                <b>付款截止: {{ order.countdown }}</b>
+                            </span>
+                        </div>
+                        <div class="body">
+                            <div class="column goods">
+                                <ul>
+                                    <li v-for="item in order.skus" :key="item.id">
+                                        <a class="image" href="javascript:;">
+                                            <img :src="item.image" alt="" />
+                                        </a>
+                                        <div class="info">
+                                            <p class="name ellipsis-2">
+                                                {{ item.name }}
+                                            </p>
+                                            <p class="attr ellipsis">
+                                                <span>{{ item.attrsText }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="price">¥{{ item.realPay?.toFixed(2) }}</div>
+                                        <div class="count">x{{ item.quantity }}</div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="column state">
+                                <p>{{ fomartPayState(order.orderState) }}</p>
+                                <p v-if="order.orderState === 3">
+                                    <a href="javascript:;" class="green">查看物流</a>
+                                </p>
+                                <p v-if="order.orderState === 4">
+                                    <a href="javascript:;" class="green">评价商品</a>
+                                </p>
+                                <p v-if="order.orderState === 5">
+                                    <a href="javascript:;" class="green">查看评价</a>
+                                </p>
+                            </div>
+                            <div class="column amount">
+                                <p class="red">¥{{ order.payMoney?.toFixed(2) }}</p>
+                                <p>（含运费：¥{{ order.postFee?.toFixed(2) }}）</p>
+                                <p>在线支付</p>
+                            </div>
+                            <div class="column action">
+                                <el-button v-if="order.orderState === 1" type="primary" size="small">
+                                    立即付款
+                                </el-button>
+                                <el-button v-if="order.orderState === 3" type="primary" size="small">
+                                    确认收货
+                                </el-button>
+                                <p><a href="javascript:;">查看详情</a></p>
+                                <p v-if="[2, 3, 4, 5].includes(order.orderState)">
+                                    <a href="javascript:;">再次购买</a>
+                                </p>
+                                <p v-if="[4, 5].includes(order.orderState)">
+                                    <a href="javascript:;">申请售后</a>
+                                </p>
+                                <p v-if="order.orderState === 1"><a href="javascript:;">取消订单</a></p>
+                            </div>
+                        </div> 
+                    </div>
+                    <!-- 分页 -->
+                    <div class="pagination-container">
+                        <el-pagination :total="total" @current-change="pageChange" :page-size="params.pageSize" background layout="prev, pager, next" />
+                    </div>
+                </div>
+            </div>
+
+        </el-tabs>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.order-container {
+    padding: 10px 20px;
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .main-container {
+        min-height: 500px;
+
+        .holder-container {
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}
+
+.order-item {
+    margin-bottom: 20px;
+    border: 1px solid #f5f5f5;
+
+    .head {
+        height: 50px;
+        line-height: 50px;
+        background: #f5f5f5;
+        padding: 0 20px;
+        overflow: hidden;
+
+        span {
+            margin-right: 20px;
+
+            &.down-time {
+                margin-right: 0;
+                float: right;
+
+                i {
+                    vertical-align: middle;
+                    margin-right: 3px;
+                }
+
+                b {
+                    vertical-align: middle;
+                    font-weight: normal;
+                }
+            }
+        }
+
+        .del {
+            margin-right: 0;
+            float: right;
+            color: #999;
+        }
+    }
+
+    .body {
+        display: flex;
+        align-items: stretch;
+
+        .column {
+            border-left: 1px solid #f5f5f5;
+            text-align: center;
+            padding: 20px;
+
+            >p {
+                padding-top: 10px;
+            }
+
+            &:first-child {
+                border-left: none;
+            }
+
+            &.goods {
+                flex: 1;
+                padding: 0;
+                align-self: center;
+
+                ul {
+                    li {
+                        border-bottom: 1px solid #f5f5f5;
+                        padding: 10px;
+                        display: flex;
+
+                        &:last-child {
+                            border-bottom: none;
+                        }
+
+                        .image {
+                            width: 70px;
+                            height: 70px;
+                            border: 1px solid #f5f5f5;
+                        }
+
+                        .info {
+                            width: 220px;
+                            text-align: left;
+                            padding: 0 10px;
+
+                            p {
+                                margin-bottom: 5px;
+
+                                &.name {
+                                    height: 38px;
+                                }
+
+                                &.attr {
+                                    color: #999;
+                                    font-size: 12px;
+
+                                    span {
+                                        margin-right: 5px;
+                                    }
+                                }
+                            }
+                        }
+
+                        .price {
+                            width: 100px;
+                        }
+
+                        .count {
+                            width: 80px;
+                        }
+                    }
+                }
+            }
+
+            &.state {
+                width: 120px;
+
+                .green {
+                    color: $xtxColor;
+                }
+            }
+
+            &.amount {
+                width: 200px;
+
+                .red {
+                    color: $priceColor;
+                }
+            }
+
+            &.action {
+                width: 140px;
+
+                a {
+                    display: block;
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+}
+</style>
+    { name: "all", label: "全部订单" },
+    { name: "unpay", label: "待付款" },
+    { name: "deliver", label: "待发货" },
+    { name: "receive", label: "待收货" },
+    { name: "comment", label: "待评价" },
+    { name: "complete", label: "已完成" },
+    { name: "cancel", label: "已取消" }
+]
+// 订单列表
+const orderList = ref([])
+const total = ref(0)
+const params = ref({
+    orderState: 0,
+    page: 1,
+    pageSize: 2
+})
+const getOrderList = async () => {
+    const res = await getUserOrder(params.value)
+    orderList.value = res.result.items
+    total.value = res.result.counts
+}
+onMounted(() => {
+    getOrderList()
+})
+
+//tab切换
+const tabChange = (type) => {
+    params.value.orderState = type
+    getOrderList()
+}
+
+//页数切换
+const pageChange = (page) => {
+    params.value.page = page
+    getOrderList()
+}
+</script>
+
+<template>
+    <div class="order-container">
+        <el-tabs @tab-change="tabChange">
+            <!-- tab切换 -->
+            <el-tab-pane v-for="item in tabTypes" :key="item.name" :label="item.label" />
+
+            <div class="main-container">
+                <div class="holder-container" v-if="orderList.length === 0">
+                    <el-empty description="暂无订单数据" />
+                </div>
+                <div v-else>
+                    <!-- 订单列表 -->
+                    <div class="order-item" v-for="order in orderList" :key="order.id">
+                        <div class="head">
+                            <span>下单时间：{{ order.createTime }}</span>
+                            <span>订单编号：{{ order.id }}</span>
+                            <!-- 未付款，倒计时时间还有 -->
+                            <span class="down-time" v-if="order.orderState === 1">
+                                <i class="iconfont icon-down-time"></i>
+                                <b>付款截止: {{ order.countdown }}</b>
+                            </span>
+                        </div>
+                        <div class="body">
+                            <div class="column goods">
+                                <ul>
+                                    <li v-for="item in order.skus" :key="item.id">
+                                        <a class="image" href="javascript:;">
+                                            <img :src="item.image" alt="" />
+                                        </a>
+                                        <div class="info">
+                                            <p class="name ellipsis-2">
+                                                {{ item.name }}
+                                            </p>
+                                            <p class="attr ellipsis">
+                                                <span>{{ item.attrsText }}</span>
+                                            </p>
+                                        </div>
+                                        <div class="price">¥{{ item.realPay?.toFixed(2) }}</div>
+                                        <div class="count">x{{ item.quantity }}</div>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="column state">
+                                <p>{{ order.orderState }}</p>
+                                <p v-if="order.orderState === 3">
+                                    <a href="javascript:;" class="green">查看物流</a>
+                                </p>
+                                <p v-if="order.orderState === 4">
+                                    <a href="javascript:;" class="green">评价商品</a>
+                                </p>
+                                <p v-if="order.orderState === 5">
+                                    <a href="javascript:;" class="green">查看评价</a>
+                                </p>
+                            </div>
+                            <div class="column amount">
+                                <p class="red">¥{{ order.payMoney?.toFixed(2) }}</p>
+                                <p>（含运费：¥{{ order.postFee?.toFixed(2) }}）</p>
+                                <p>在线支付</p>
+                            </div>
+                            <div class="column action">
+                                <el-button v-if="order.orderState === 1" type="primary" size="small">
+                                    立即付款
+                                </el-button>
+                                <el-button v-if="order.orderState === 3" type="primary" size="small">
+                                    确认收货
+                                </el-button>
+                                <p><a href="javascript:;">查看详情</a></p>
+                                <p v-if="[2, 3, 4, 5].includes(order.orderState)">
+                                    <a href="javascript:;">再次购买</a>
+                                </p>
+                                <p v-if="[4, 5].includes(order.orderState)">
+                                    <a href="javascript:;">申请售后</a>
+                                </p>
+                                <p v-if="order.orderState === 1"><a href="javascript:;">取消订单</a></p>
+                            </div>
+                        </div> 
+                    </div>
+                    <!-- 分页 -->
+                    <div class="pagination-container">
+                        <el-pagination :total="total" @current-change="pageChange" :page-size="params.pageSize" background layout="prev, pager, next" />
+                    </div>
+                </div>
+            </div>
+
+        </el-tabs>
+    </div>
+</template>
+
+<style scoped lang="scss">
+.order-container {
+    padding: 10px 20px;
+
+    .pagination-container {
+        display: flex;
+        justify-content: center;
+    }
+
+    .main-container {
+        min-height: 500px;
+
+        .holder-container {
+            min-height: 500px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}
+
+.order-item {
+    margin-bottom: 20px;
+    border: 1px solid #f5f5f5;
+
+    .head {
+        height: 50px;
+        line-height: 50px;
+        background: #f5f5f5;
+        padding: 0 20px;
+        overflow: hidden;
+
+        span {
+            margin-right: 20px;
+
+            &.down-time {
+                margin-right: 0;
+                float: right;
+
+                i {
+                    vertical-align: middle;
+                    margin-right: 3px;
+                }
+
+                b {
+                    vertical-align: middle;
+                    font-weight: normal;
+                }
+            }
+        }
+
+        .del {
+            margin-right: 0;
+            float: right;
+            color: #999;
+        }
+    }
+
+    .body {
+        display: flex;
+        align-items: stretch;
+
+        .column {
+            border-left: 1px solid #f5f5f5;
+            text-align: center;
+            padding: 20px;
+
+            >p {
+                padding-top: 10px;
+            }
+
+            &:first-child {
+                border-left: none;
+            }
+
+            &.goods {
+                flex: 1;
+                padding: 0;
+                align-self: center;
+
+                ul {
+                    li {
+                        border-bottom: 1px solid #f5f5f5;
+                        padding: 10px;
+                        display: flex;
+
+                        &:last-child {
+                            border-bottom: none;
+                        }
+
+                        .image {
+                            width: 70px;
+                            height: 70px;
+                            border: 1px solid #f5f5f5;
+                        }
+
+                        .info {
+                            width: 220px;
+                            text-align: left;
+                            padding: 0 10px;
+
+                            p {
+                                margin-bottom: 5px;
+
+                                &.name {
+                                    height: 38px;
+                                }
+
+                                &.attr {
+                                    color: #999;
+                                    font-size: 12px;
+
+                                    span {
+                                        margin-right: 5px;
+                                    }
+                                }
+                            }
+                        }
+
+                        .price {
+                            width: 100px;
+                        }
+
+                        .count {
+                            width: 80px;
+                        }
+                    }
+                }
+            }
+
+            &.state {
+                width: 120px;
+
+                .green {
+                    color: $xtxColor;
+                }
+            }
+
+            &.amount {
+                width: 200px;
+
+                .red {
+                    color: $priceColor;
+                }
+            }
+
+            &.action {
+                width: 140px;
+
+                a {
+                    display: block;
+
+                    &:hover {
+                        color: $xtxColor;
+                    }
+                }
+            }
+        }
+    }
+}
+</style>
+```
+
