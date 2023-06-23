@@ -59,7 +59,7 @@ export default hopeTheme({
     comment: {
       // You should generate and use your own comment service
       provider: "Waline",
-      serverURL: "https://walines-self.vercel.app/",
+      serverURL: "https://waline.tobebetterll.xyz/",
     },
 
     // all features are enabled for demo, only preserve features you need here

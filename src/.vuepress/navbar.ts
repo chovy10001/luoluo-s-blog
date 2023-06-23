@@ -13,7 +13,7 @@ export default navbar([
     link: "/note"
   },
   {
-    text: "学习笔记",
+    text: "笔记",
     icon: "icon-layers",
     prefix: "/study",
     children: [
