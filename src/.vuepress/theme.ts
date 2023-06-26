@@ -12,7 +12,7 @@ export default hopeTheme({
     name: "luoluo",
     url: "https://luoluo-s-blog.vercel.app/",
   },
-  iconAssets: "//at.alicdn.com/t/c/font_4133807_6mw7iiqruee.css",
+  iconAssets: "//at.alicdn.com/t/c/font_4133807_jze0yhg9lwg.css",
   iconPrefix: "iconfont ",
 
   logo: "/assets/images/home/me.jpg",
@@ -21,9 +21,16 @@ export default hopeTheme({
   repo: "https://github.com/chovy10001/luoluo-s-blog",
 
   docsDir: "src",
+  prismjs: false,
 
   // navbar
   navbar,
+  //导航栏布局
+  navbarLayout: {
+    left: ["Brand"],
+    center: ["Links"],
+    right: ["Repo", "Outlook", "Search"],
+  },
 
   // sidebar
   sidebar,
@@ -62,6 +69,23 @@ export default hopeTheme({
       provider: "Waline",
       //waline评论二级域名
       serverURL: "https://waline.tobebetterll.xyz/",
+      reaction: true,
+      // 设置 emoji 为微博与哔哩哔哩
+      emoji: [
+        '//unpkg.com/@waline/emojis@1.1.0/weibo',
+        '//unpkg.com/@waline/emojis@1.1.0/bilibili',
+        'https://unpkg.com/@waline/emojis@1.1.0/alus',
+        'https://unpkg.com/@waline/emojis@1.1.0/bmoji',
+        'https://unpkg.com/@waline/emojis@1.1.0/tw-emoji',
+        'https://unpkg.com/@waline/emojis@1.1.0/tieba',
+        'https://unpkg.com/@waline/emojis@1.1.0/qq'
+      ],
+      locales: {
+        "/": {
+          placeholder:
+            "欢迎留言~ _(≧∇≦」∠)_ (填写常用邮箱即可快速收到回复通知~)",
+        },
+      },
     },
 
     // all features are enabled for demo, only preserve features you need here

@@ -3,7 +3,7 @@ category:
     - 前端项目
 tag:
     - Vue3
-    - elementPlus
+    - ElementPlus
 ---
 # 小兔鲜电商平台
 ### 项目初始化与git管理
@@ -24,7 +24,7 @@ tag:
 
 使用命令
 
-```Plain Text
+```js
 git init 
 git add .
 git commit -m "项目初始化"
@@ -32,12 +32,12 @@ git commit -m "项目初始化"
 
 ### 配置别名路径联想提示
 
-1.在项目的根目录下新增`jsconfig.json`文件
-2.添加json格式的配置项，如下：
+1.在项目的根目录下新增``jsconfig.`json`文件
+2.添加`json格式的配置项，如下：
 
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685507218328-410106dd-ec1a-4682-80dc-fc1571b87a64.png#averageHue=%231e1e1d&clientId=ua8b1aea1-d99a-4&from=paste&height=322&id=u43c23ea4&originHeight=402&originWidth=942&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=31770&status=done&style=none&taskId=u52f48651-5129-4c57-895e-f49e9c46b7e&title=&width=753.6)
 
-```JSON
+```json
 {
   "compilerOptions": {
     "baseUrl": "./",
@@ -52,25 +52,25 @@ git commit -m "项目初始化"
 
 ### 配置elementPlus按需自动导入
 
-```JavaScript
+```js
 pnpm i element-plus -S
 pnpm i -D unplugin-vue-components unplugin-auto-import
 ```
 
-在`vite.config.js`中的配置
+在`vite.config.`js`中的配置
 
-```JavaScript
+```js
 import { fileURLToPath, URL } from 'node:url'
 
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import vue from '@vite`js/plugin-vue'
 
 // elementplus按需自动导入
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 
-// https://vitejs.dev/config/
+// https://vite`js.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -100,7 +100,7 @@ export default defineConfig({
 
 styles/element/index.scss
 
-```JavaScript
+```js
 // 只需要重写你需要的即可
 @forward 'element-plus/theme-chalk/src/common/var.scss' with(
     $colors:(
@@ -134,18 +134,18 @@ styles/element/index.scss
 
 2. 自动导入定制化样式文件进行样式覆盖
 
-```JavaScript
+```js
 import { fileURLToPath, URL } from "node:url";
 
 import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
+import vue from "@vite`js/plugin-vue";
 
 // elementplus按需自动导入
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 
-// https://vitejs.dev/config/
+// https://vite`js.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -181,10 +181,10 @@ export default defineConfig({
 ### axios基础配置
 
 安装axios`pnpm i axios`
-在utils下新建http.js
-utils/http.js
+在utils下新建http.`js
+utils/http.`js
 
-```JavaScript
+```js
 //axios的基础封装
 import axios from 'axios'
 
@@ -220,7 +220,7 @@ export default httpInstance
 
 - 降低eslint规范，不再强制要求组件命名
 
-```JavaScript
+```js
 /* eslint-env node */
 module.exports = {
   root: true,
@@ -240,9 +240,9 @@ module.exports = {
 
 - 添加路由页面Layout，Home，Login，Category
 
-router/index.js
+router/index.`js
 
-```JavaScript
+```js
 // createRouter:创建router实例对象
 // createWebHistory:创建history模式的路由
 
@@ -279,9 +279,9 @@ export default router;
 
 ### 静态资源引入和errorlen安装
 
-在main.js引入
+在main.`js引入
 
-```JavaScript
+```js
 import './assets/main.css'
 
 import { createApp } from 'vue'
@@ -316,7 +316,7 @@ errorlens是一个实时提供错误信息的vscode插件，方便开发
 
 在styles文件夹下新建var.scss
 
-```JavaScript
+```js
 $xtxColor:#27ba9b;
 $helpColor:#e26237;
 $sucColor:#1dc779;
@@ -324,20 +324,20 @@ $warnColor:#ffb302;
 $priceColor:#cf4444;
 ```
 
-在vite.config.js配置
+在vite.config.`js配置
 
-```JavaScript
+```js
 import { fileURLToPath, URL } from "node:url";
 
 import { defineConfig } from "vite";
-import vue from "@vitejs/plugin-vue";
+import vue from "@vite`js/plugin-vue";
 
 // elementplus按需自动导入
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 
-// https://vitejs.dev/config/
+// https://vite`js.dev/config/
 export default defineConfig({
   plugins: [
     vue(),
@@ -375,7 +375,7 @@ export default defineConfig({
 
 views/Layout/index.vue
 
-```JavaScript
+```js
 <script setup>
 import LayoutNav from './components/LayoutNav.vue'
 import LayoutHeader from './components/LayoutHeader.vue'
@@ -395,7 +395,7 @@ import LayoutFooter from './components/LayoutFooter.vue'
 
 在index.html中引入
 
-```JavaScript
+```js
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -407,7 +407,7 @@ import LayoutFooter from './components/LayoutFooter.vue'
   </head>
   <body>
     <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/main.`js"></script>
   </body>
 </html>
 
@@ -415,9 +415,9 @@ import LayoutFooter from './components/LayoutFooter.vue'
 
 ### 渲染一级导航
 
-apis文件夹下新建layout.js文件
+apis文件夹下新建layout.`js文件
 
-```JavaScript
+```js
 import httpInstance from "@/utils/http";
 
 export function getCategoryAPI() {
@@ -429,7 +429,7 @@ export function getCategoryAPI() {
 
 layoutHeader.vue获取数据渲染
 
-```JavaScript
+```js
 <script setup>
 import { getCategoryAPI } from '@/apis/layout';
 import { onMounted, ref } from 'vue';
@@ -452,7 +452,7 @@ onMounted(() => {
 使用命令`pnpm i @vueuse/core`
 使用插件获取到顶部的距离，大于一定距离就显示吸顶导航
 
-```JavaScript
+```js
 <script setup>
 import { useScroll } from '@vueuse/core'
 const { y } = useScroll(window)
@@ -595,9 +595,9 @@ const { y } = useScroll(window)
 ### 请求导航数据优化
 
 在header组件和fixed组件都会用到导航数据，并且逻辑一样，请求到的数据一样，因此用pinia管理数据
-在stores中新建category.js
+在stores中新建category.`js
 
-```JavaScript
+```js
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import { getCategoryAPI } from "@/apis/layout";
@@ -622,7 +622,7 @@ export const useCategoryStore = defineStore("category", () => {
 先在layout组件请求一次把数据存在pinia中，再在header组件和fixed组件中使用数据
 src/views/Layout/index.vue
 
-```JavaScript
+```js
 <script setup>
 import LayoutNav from './components/LayoutNav.vue'
 import LayoutHeader from './components/LayoutHeader.vue'
@@ -649,7 +649,7 @@ onMounted(() => {
 
 src/views/Layout/components/LayoutFixed.vue
 
-```JavaScript
+```js
 <script setup>
 import { useScroll } from '@vueuse/core'
 import { useCategoryStore } from '@/stores/category';
@@ -768,7 +768,7 @@ const categoryStore = useCategoryStore()
 
 src/views/Layout/components/LayoutHeader.vue
 
-```JavaScript
+```js
 <script setup>
 import { useCategoryStore } from '@/stores/category';
 //渲染一级导航数据
@@ -903,7 +903,7 @@ const categoryStore = useCategoryStore()
 
 ### 分类导航实现
 
-```JavaScript
+```js
 <script setup>
 import { useCategoryStore } from '@/stores/category'
 const categoryStore = useCategoryStore()
@@ -1064,7 +1064,7 @@ const categoryStore = useCategoryStore()
 
 在pinia中设置请求
 
-```JavaScript
+```js
 import httpInstance from '@/utils/http'
 //获取Banner
 export function getBannerAPI() {
@@ -1076,7 +1076,7 @@ export function getBannerAPI() {
 
 在HomeBanner.vue中发起请求进行数据渲染
 
-```JavaScript
+```js
 <script setup>
 import { getBannerAPI } from '@/apis/home';
 import {ref,onMounted} from 'vue'
@@ -1133,9 +1133,9 @@ onMounted(() => {
 
 #### 设置请求接口
 
-home.js
+home.`js
 
-```JavaScript
+```js
 import httpInstance from '@/utils/http'
 //获取Banner
 export function getBannerAPI() {
@@ -1158,7 +1158,7 @@ export const findNewAPI = () => {
 
 封装HomePannel组件
 
-```JavaScript
+```js
 <script setup>
 //定义props
 defineProps({
@@ -1219,7 +1219,7 @@ defineProps({
 
 在HomeNew组应用
 
-```JavaScript
+```js
 <script setup>
 import HomePanel from './HomePanel.vue'
 import { findNewAPI } from '@/apis/home';
@@ -1295,9 +1295,9 @@ onMounted(() => {
 
 ### 图片懒加载指令实现
 
-在directives中新建index.js文件
+在directives中新建index.`js文件
 
-```JavaScript
+```js
 import { useIntersectionObserver } from "@vueuse/core";
 // 定义懒加载插件
 export const lazyPlugin = {
@@ -1320,9 +1320,9 @@ export const lazyPlugin = {
 }
 ```
 
-在main.js中注册指令使用插件
+在main.`js中注册指令使用插件
 
-```JavaScript
+```js
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
@@ -1349,7 +1349,7 @@ app.mount('#app')
 
 HomeProduct.vue
 
-```JavaScript
+```js
 <script setup>
 import HomePanel from './HomePanel.vue'
 import { getGoodsAPI } from '@/apis/home';
@@ -1519,9 +1519,9 @@ onMounted(() => {
 </style>
 ```
 
-添加接口`apis/home.js`
+添加接口`apis/home.`js`
 
-```JavaScript
+```js
 import httpInstance from '@/utils/http'
 //获取Banner
 export function getBannerAPI() {
@@ -1566,7 +1566,7 @@ export const getGoodsAPI = () => {
 
 ### GoodsItem组件封装
 
-```JavaScript
+```js
 <script setup>
   defineProps({
     good: {
@@ -1626,7 +1626,7 @@ export const getGoodsAPI = () => {
 
 Category/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCategoryAPI } from '@/apis/category'
 import { ref, watch } from 'vue'
@@ -1741,7 +1741,7 @@ watch(route, () => getCategory(), { immediate: true })
 
 请求逻辑更改
 
-```JavaScript
+```js
 import httpInstance from '@/utils/http'
 //获取Banner
 export function getBannerAPI(params = {}) {
@@ -1791,7 +1791,7 @@ export const getGoodsAPI = () => {
 
 category/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCategoryAPI } from '@/apis/category'
 import { ref, watch,onMounted } from 'vue'
@@ -1936,13 +1936,13 @@ onMounted(() => {
 
 ### 激活控制和分类列表渲染
 
-```JavaScript
+```js
 <RouterLink active-class="active" :to="`/category/${item.id}`">{{ item.name }}</RouterLink>
 ```
 
 category/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCategoryAPI } from '@/apis/category'
 import { ref, watch, onMounted } from 'vue'
@@ -2109,7 +2109,7 @@ onMounted(() => {
 
 category/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCategoryAPI } from '@/apis/category'
 import { ref, onMounted } from 'vue'
@@ -2280,10 +2280,10 @@ onMounted(() => {
 
 ### 使用逻辑函数拆分业务
 
-在view/category下新建composables文件夹，新建useBanner.js和useCategory.js文件
-useCategory.js
+在view/category下新建composables文件夹，新建useBanner.`js和useCategory.`js文件
+useCategory.`js
 
-```JavaScript
+```js
 // 封装分类数据业务相关业务代码
 import { getCategoryAPI } from "@/apis/category";
 import { ref, onMounted } from "vue";
@@ -2310,9 +2310,9 @@ export function useCategory() {
 
 ```
 
-useBanner.js
+useBanner.`js
 
-```JavaScript
+```js
 // 封装banner轮播图相关的业务代码
 import { ref, onMounted } from "vue";
 import { getBannerAPI } from "@/apis/home";
@@ -2336,7 +2336,7 @@ export function useBanner() {
 
 Category/index.vue
 
-```JavaScript
+```js
 <script setup>
 
 
@@ -2487,7 +2487,7 @@ const { categoryData } = useCategory()
 
 views/SubCategory/index.vue
 
-```JavaScript
+```js
 <script setup>
 
 
@@ -2577,9 +2577,9 @@ views/SubCategory/index.vue
 </style>
 ```
 
-router/index.js
+router/index.`js
 
-```JavaScript
+```js
 // createRouter:创建router实例对象
 // createWebHistory:创建history模式的路由
 
@@ -2620,7 +2620,7 @@ export default router;
 
 Category/index.vue
 
-```JavaScript
+```js
 <script setup>
 
 
@@ -2769,9 +2769,9 @@ const { categoryData } = useCategory()
 
 ### 面包屑导航实现
 
-apis/category.js
+apis/category.`js
 
-```JavaScript
+```js
 import request from '@/utils/http'
 
 export function getCategoryAPI(id) {
@@ -2802,7 +2802,7 @@ export const getCategoryFilterAPI = (id) => {
 
 views/SubCategory/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCategoryFilterAPI } from '@/apis/category'
 import { onMounted, ref } from 'vue'
@@ -2905,9 +2905,9 @@ onMounted(() => {
 
 ### 基础商品列表实现
 
-apis/category.js
+apis/category.`js
 
-```JavaScript
+```js
 import request from '@/utils/http'
 
 export function getCategoryAPI(id) {
@@ -2956,7 +2956,7 @@ export const getSubCategoryAPI = (data) => {
 
 SubCategory/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCategoryFilterAPI } from '@/apis/category'
 import { onMounted, ref } from 'vue'
@@ -3078,7 +3078,7 @@ onMounted(()=>getGoodList())
 
 SubCategory/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCategoryFilterAPI } from '@/apis/category'
 import { onMounted, ref } from 'vue'
@@ -3206,7 +3206,7 @@ const tabChange = () => {
 
 SubCategory/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCategoryFilterAPI } from '@/apis/category'
 import { onMounted, ref } from 'vue'
@@ -3345,9 +3345,9 @@ const load = async () => {
 
 ### 路由滚动行为优化
 
-router/index.js
+router/index.`js
 
-```JavaScript
+```js
 // createRouter:创建router实例对象
 // createWebHistory:创建history模式的路由
 
@@ -3393,9 +3393,9 @@ export default router;
 
 ### 详情页路由配置
 
-router/index.js
+router/index.`js
 
-```JavaScript
+```js
 // createRouter:创建router实例对象
 // createWebHistory:创建history模式的路由
 
@@ -3445,7 +3445,7 @@ export default router;
 views下新建Detail文件
 Detail/index.vue
 
-```JavaScript
+```js
 <script setup>
 
 
@@ -3808,7 +3808,7 @@ Detail/index.vue
 
 封装接口
 
-```JavaScript
+```js
 import request from '@/utils/http'
 
 export const getDetail = (id) => {
@@ -3823,7 +3823,7 @@ export const getDetail = (id) => {
 
 views/Detail/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getDetail } from '@/apis/detail'
 import { onMounted, ref } from 'vue';
@@ -4199,7 +4199,7 @@ onMounted(() => {
 
 ### 热榜区基础组件封装和数据渲染
 
-```JavaScript
+```js
 import request from '@/utils/http'
 
 export const getDetail = (id) => {
@@ -4231,7 +4231,7 @@ export const fetchHotGoodsAPI = ({ id, type, limit = 3 }) => {
 
 views/Detail/components/DetailHot.vue
 
-```JavaScript
+```js
 <script setup>
 // 以24小时热榜获取数据渲染模板
 import { fetchHotGoodsAPI } from '@/apis/detail'
@@ -4318,7 +4318,7 @@ onMounted(() => {
 
 DetailHot.vue
 
-```JavaScript
+```js
 <script setup>
 // 以24小时热榜获取数据渲染模板
 import { fetchHotGoodsAPI } from '@/apis/detail'
@@ -4419,7 +4419,7 @@ onMounted(() => {
 
 components/ImageView/index.vue
 
-```JavaScript
+```js
 <script setup>
 import {ref} from 'vue'
 // 图片列表
@@ -4525,7 +4525,7 @@ const enterhandler = (i) => {
 
 components/ImageView/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { ref, watch } from 'vue'
 import { useMouseInElement } from '@vueuse/core';
@@ -4665,7 +4665,7 @@ watch([elementX, elementY], () => {
 
 components/ImageView/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { ref, watch } from 'vue'
 import { useMouseInElement } from '@vueuse/core';
@@ -4807,7 +4807,7 @@ watch([elementX, elementY], () => {
 
 components/XtxSku/index.vue
 
-```JavaScript
+```js
 <template>
   <div class="goods-sku">
     <dl v-for="item in goods.specs" :key="item.id">
@@ -5011,9 +5011,9 @@ export default {
 </style>
 ```
 
-components/XtxSku/power-set.js
+components/XtxSku/power-set.`js
 
-```JavaScript
+```js
 
 export default function bwPowerSet (originalSet) {
   const subSets = []
@@ -5047,7 +5047,7 @@ export default function bwPowerSet (originalSet) {
 
 Detail/index.vue
 
-```JavaScript
+```js
 <script setup>
 import DetailHot from './components/DetailHot.vue'
 import ImageView from '@/components/ImageView/index.vue'
@@ -5434,9 +5434,9 @@ const skuChange = (sku) => {
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685638966079-e2d6b7ec-6c83-469b-ace9-2dfdbd57cc3a.png#averageHue=%238e8473&clientId=u8a75a16d-c7f0-4&from=paste&height=526&id=u4afa2b6f&originHeight=657&originWidth=1599&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=170203&status=done&style=none&taskId=uee761c1b-650e-468b-b73a-b5e46e513e9&title=&width=1279.2)
 
 
-components/index.js
+components/index.`js
 
-```JavaScript
+```js
 // 把components中的所组件都进行全局化注册
 // 通过插件的方式
 import ImageView from "./ImageView/index.vue";
@@ -5451,9 +5451,9 @@ export const componentPlugin = {
 
 ```
 
-main.js
+main.`js
 
-```JavaScript
+```js
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 
@@ -5482,7 +5482,7 @@ app.mount("#app");
 
 views/Login/index.vue
 
-```JavaScript
+```js
 <script setup>
 import {ref} from 'vue'
 // 1.准备表单对象
@@ -5801,7 +5801,7 @@ const rules = {
 
 views/Login/index.vue
 
-```JavaScript
+```js
 <script setup>
 import {ref} from 'vue'
 // 1.准备表单对象
@@ -6135,9 +6135,9 @@ const rules = {
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685680567975-5644280b-ad48-42eb-84d8-d0477a2fa016.png#averageHue=%23d9d5cd&clientId=u2310c487-be9c-4&from=paste&height=316&id=u388b1116&originHeight=395&originWidth=806&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=318254&status=done&style=none&taskId=u728d7830-5b41-4002-bd79-d36a492dfeb&title=&width=644.8)
 
 
-apis/user.js
+apis/user.`js
 
-```JavaScript
+```js
 //封装所有和用户相关的接口函数
 import request from "@/utils/http";
 
@@ -6155,7 +6155,7 @@ export const loginAPI = ({account,password}) => {
 
 views/Login/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { ref } from 'vue'
 import { loginAPI } from '@/apis/user'
@@ -6510,9 +6510,9 @@ const doLogin = () => {
 
 ### pinia管理用户数据
 
-store/user.js
+store/user.`js
 
-```JavaScript
+```js
 // 管理用户数据相关
 
 import { defineStore } from "pinia";
@@ -6537,7 +6537,7 @@ export const useUserStore = defineStore('user', () => {
 
 views/Login/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
@@ -6894,10 +6894,10 @@ const doLogin = () => {
 ### pinia用户数据持久化
 
 使用插件`pnpm i pinia-plugin-persistedstate`
-main.js使用插件
-main.js
+main.`js使用插件
+main.`js
 
-```JavaScript
+```js
 import { createApp } from "vue";
 import { createPinia } from "pinia";
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
@@ -6925,9 +6925,9 @@ app.mount("#app");
 
 ```
 
-stores/user.js
+stores/user.`js
 
-```JavaScript
+```js
 // 管理用户数据相关
 
 import { defineStore } from "pinia";
@@ -6958,7 +6958,7 @@ export const useUserStore = defineStore('user', () => {
 
 Layout/components/LayoutNav.vue
 
-```JavaScript
+```js
 <script setup>
 import { useUserStore } from '@/stores/user';
 const userStore = useUserStore()
@@ -7033,9 +7033,9 @@ const userStore = useUserStore()
 
 ### 请求拦截器携带token
 
-utils/http.js
+utils/http.`js
 
-```JavaScript
+```js
 //axios的基础封装
 import axios from "axios";
 import { ElMessage } from "element-plus";
@@ -7082,9 +7082,9 @@ export default httpInstance;
 
 ### 退出登录业务逻辑实现
 
-stores/user.js
+stores/user.`js
 
-```JavaScript
+```js
 // 管理用户数据相关
 
 import { defineStore } from "pinia";
@@ -7116,7 +7116,7 @@ export const useUserStore = defineStore('user', () => {
 
 Layout/components/LayoutNav.vue
 
-```JavaScript
+```js
 <script setup>
 import { useUserStore } from '@/stores/user';
 import { useRouter } from 'vue-router';
@@ -7202,9 +7202,9 @@ const confirm = () => {
 
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685692316175-779ffa7a-8b05-440f-825d-dae084379701.png#averageHue=%23f8f7f7&clientId=u2310c487-be9c-4&from=paste&height=606&id=ud26ad66a&originHeight=758&originWidth=1583&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=310309&status=done&style=none&taskId=u6f5d3bf7-19b9-48df-bd06-b0926fef3f1&title=&width=1266.4)
 
- utils/http.js
+ utils/http.`js
 
-```JavaScript
+```js
 //axios的基础封装
 import axios from "axios";
 import { ElMessage } from "element-plus";
@@ -7263,9 +7263,9 @@ export default httpInstance;
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685699522306-e1256ab5-33a9-4dc0-bc27-3b4a061fd513.png#averageHue=%23dd985f&clientId=u2310c487-be9c-4&from=paste&height=515&id=u2df10661&originHeight=644&originWidth=1620&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=234750&status=done&style=none&taskId=u5375ac1e-f3ef-4771-aed9-ce01a9b67c0&title=&width=1296)
 
 
-stores/cartstore.js
+stores/cartstore.`js
 
-```JavaScript
+```js
 // 封装购物车模块
 
 import { defineStore } from "pinia";
@@ -7300,7 +7300,7 @@ export const useCartStore = defineStore('cart', () => {
 
 Detail.vue
 
-```JavaScript
+```js
 <script setup>
 import DetailHot from './components/DetailHot.vue'
 import { getDetail } from '@/apis/detail'
@@ -7716,7 +7716,7 @@ const addCart = () => {
 
 Layout/components/HeaderCart.vue
 
-```JavaScript
+```js
 <script setup>
 import { useCartStore } from '@/stores/cartstore';
 const cartStore = useCartStore()
@@ -7943,9 +7943,9 @@ const cartStore = useCartStore()
 
 ### 头部购物车删除功能实现
 
-stores/cartstore.js
+stores/cartstore.`js
 
-```JavaScript
+```js
     // 封装购物车模块
 
     import { defineStore } from "pinia";
@@ -7992,9 +7992,9 @@ stores/cartstore.js
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685701268726-f61c4715-9da2-4646-82e0-b26971053df4.png#averageHue=%23f9f9f9&clientId=u2310c487-be9c-4&from=paste&height=599&id=u077fd637&originHeight=749&originWidth=1257&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=194645&status=done&style=none&taskId=uf0a8edc9-42da-4835-8426-8ecfcb5467c&title=&width=1005.6)
 
 
-stores/cartstore.js
+stores/cartstore.`js
 
-```JavaScript
+```js
 // 封装购物车模块
 
 import { defineStore } from "pinia";
@@ -8056,9 +8056,9 @@ export const useCartStore = defineStore(
 
 ### 列表购物车基础数据渲染
 
-router/index.js
+router/index.`js
 
-```JavaScript
+```js
 // createRouter:创建router实例对象
 // createWebHistory:创建history模式的路由
 
@@ -8111,7 +8111,7 @@ export default router;
 
 views/Cartlist/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { useCartStore } from '@/stores/cartstore';
 const cartStore = useCartStore()
@@ -8329,9 +8329,9 @@ const cartStore = useCartStore()
 
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685702428416-fa9b2d20-1839-445b-89e6-f4cfea272288.png#averageHue=%23f8f8f8&clientId=u2310c487-be9c-4&from=paste&height=617&id=ube5163a6&originHeight=771&originWidth=1636&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=319528&status=done&style=none&taskId=u09fd3984-bf79-4dcd-8b21-7d0719f5e50&title=&width=1308.8)
 
-stores/cartstore.js
+stores/cartstore.`js
 
-```JavaScript
+```js
 // 封装购物车模块
 
 import { defineStore } from "pinia";
@@ -8401,7 +8401,7 @@ export const useCartStore = defineStore(
 
 views/Cartlist/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { useCartStore } from '@/stores/cartstore';
 const cartStore = useCartStore()
@@ -8624,9 +8624,9 @@ const singleCheck = (i, selected) => {
 
 ### 列表购物车全选功能
 
-stores/cartstore.js
+stores/cartstore.`js
 
-```JavaScript
+```js
 // 封装购物车模块
 
 import { defineStore } from "pinia";
@@ -8706,7 +8706,7 @@ export const useCartStore = defineStore(
 
 views/Cartlist/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { useCartStore } from '@/stores/cartstore';
 const cartStore = useCartStore()
@@ -8936,9 +8936,9 @@ const allCheck = (selected) => {
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685704872050-5f4adc5e-b838-4b1d-8848-f587be182c8d.png#averageHue=%23f6f3f1&clientId=u2310c487-be9c-4&from=paste&height=128&id=uc9b8d57c&originHeight=160&originWidth=933&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=90180&status=done&style=none&taskId=u97475e59-f7fb-491f-9962-06d529b5327&title=&width=746.4)
 
 
-stores/cartstore.js
+stores/cartstore.`js
 
-```JavaScript
+```js
 // 封装购物车模块
 
 import { defineStore } from "pinia";
@@ -9028,7 +9028,7 @@ export const useCartStore = defineStore(
 
 views/Cartlist/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { useCartStore } from '@/stores/cartstore';
 const cartStore = useCartStore()
@@ -9258,9 +9258,9 @@ const allCheck = (selected) => {
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685705431088-e9c6be86-88b3-4951-9b5d-94e050ab672a.png#averageHue=%23f1a266&clientId=u2310c487-be9c-4&from=paste&height=345&id=u94f8200b&originHeight=431&originWidth=1587&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=184412&status=done&style=none&taskId=u61e1c2c0-9aa4-452d-8b0e-de26cfdac0d&title=&width=1269.6)
 
 
-apis/cart.js
+apis/cart.`js
 
-```JavaScript
+```js
 // 封装购物车相关接口
 import request from '@/utils/http'
 
@@ -9284,9 +9284,9 @@ export const findNewCartListAPI = () => {
 }
 ```
 
-stores/cartstore.js
+stores/cartstore.`js
 
-```JavaScript
+```js
 // 封装购物车模块
 
 import { defineStore } from "pinia";
@@ -9394,9 +9394,9 @@ export const useCartStore = defineStore(
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685706359389-313f7748-ab9c-4f06-99f1-d6aaf49202f4.png#averageHue=%23f09c5c&clientId=u2310c487-be9c-4&from=paste&height=258&id=u240cc961&originHeight=323&originWidth=1520&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=151340&status=done&style=none&taskId=uef2918a3-fcce-4b70-8e24-58aca01522e&title=&width=1216)
 
 
-apis/cart.js
+apis/cart.`js
 
-```JavaScript
+```js
 // 封装购物车相关接口
 import request from '@/utils/http'
 
@@ -9431,9 +9431,9 @@ export const delCartAPI = (ids) => {
 }
 ```
 
-stores/cartStore.js
+stores/cartStore.`js
 
-```JavaScript
+```js
 // 封装购物车模块
 
 import { defineStore } from "pinia";
@@ -9548,9 +9548,9 @@ export const useCartStore = defineStore(
 
 ### 退出登录-清空购物车
 
-stores/cartStore.js
+stores/cartStore.`js
 
-```JavaScript
+```js
 // 封装购物车模块
 
 import { defineStore } from "pinia";
@@ -9668,9 +9668,9 @@ export const useCartStore = defineStore(
 
 ```
 
-stores/userStore.js
+stores/userStore.`js
 
-```JavaScript
+```js
 // 管理用户数据相关
 
 import { defineStore } from "pinia";
@@ -9714,9 +9714,9 @@ export const useUserStore = defineStore(
 ![image.png](https://cdn.nlark.com/yuque/0/2023/png/36073681/1685708402202-fdae9726-6671-485c-811e-002d461fde9a.png#averageHue=%23f3f0ed&clientId=u2310c487-be9c-4&from=paste&height=594&id=u841c6077&originHeight=742&originWidth=1459&originalType=binary&ratio=1.25&rotation=0&showTitle=false&size=311306&status=done&style=none&taskId=u67b80b48-56f1-4f37-8990-409f2a45321&title=&width=1167.2)
 
 
-apis/cart.js
+apis/cart.`js
 
-```JavaScript
+```js
 // 封装购物车相关接口
 import request from '@/utils/http'
 
@@ -9760,9 +9760,9 @@ export const mergeCartAPI = (data) => {
 }
 ```
 
-stores/userStore.js
+stores/userStore.`js
 
-```JavaScript
+```js
 // 管理用户数据相关
 
 import { defineStore } from "pinia";
@@ -9814,7 +9814,7 @@ export const useUserStore = defineStore(
 
 views/Checkout/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCheckInfoAPI } from '@/apis/checkout';
 import {ref,onMounted} from 'vue'
@@ -10150,9 +10150,9 @@ onMounted(() => {
 </style>
 ```
 
-apis/checkout.js
+apis/checkout.`js
 
-```JavaScript
+```js
 import request from '@/utils/http'
 
 // 获取详情接口
@@ -10167,7 +10167,7 @@ export const getCheckInfoAPI = () => {
 
 views/Checkout/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCheckInfoAPI } from '@/apis/checkout';
 import { ref, onMounted } from 'vue'
@@ -10536,9 +10536,9 @@ const confirm = () => {
 
 ### 结算-生成订单
 
-apis/checkout.js
+apis/checkout.`js
 
-```JavaScript
+```js
 import request from '@/utils/http'
 
 // 获取详情接口
@@ -10560,7 +10560,7 @@ export const createOrderAPI = (data) => {
 
 views/Checkout/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getCheckInfoAPI, createOrderAPI } from '@/apis/checkout';
 import { ref, onMounted } from 'vue'
@@ -10961,7 +10961,7 @@ const createOrder = async () => {
 
 Pay/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getOrderAPI } from 'vue'
 import { ref ,onMounted} from 'vue'
@@ -11107,9 +11107,9 @@ onMounted(() => {
 </style>
 ```
 
-apis/pay.js
+apis/pay.`js
 
-```JavaScript
+```js
 import request from '@/utils/http'
 
 export const getOrderAPI = (id) => {
@@ -11126,7 +11126,7 @@ export const getOrderAPI = (id) => {
 
 Pay/PayBack.vue
 
-```JavaScript
+```js
 <script setup>
 import { getOrderAPI } from '@/apis/pay'
 import { onMounted, ref } from 'vue'
@@ -11213,18 +11213,18 @@ onMounted(() => getOrderInfo() )
 
 ### 支付-封装倒计时函数
 
-composables/useCountDown.js
+composables/useCountDown.`js
 
-```JavaScript
+```js
 // 封装倒计时逻辑函数
 import { ref, computed, onUnmounted } from "vue";
-import dayjs from "dayjs";
+import day`js from "day`js";
 export const useCountDown = () => {
   // 1.响应式的数据
   let timer = null;
   const time = ref(0);
   // 格式化时间 为xx分xx秒
-  const formatTime = computed(() => dayjs.unix(time.value).format("mm分ss秒"));
+  const formatTime = computed(() => day`js.unix(time.value).format("mm分ss秒"));
   // 2.开启倒计时的函数
   const start = (currentTime) => {
     // 开始倒计时的逻辑
@@ -11247,7 +11247,7 @@ export const useCountDown = () => {
 
 Pay/index.vue
 
-```JavaScript
+```js
 <script setup>
 import { getOrderAPI } from '@/apis/pay'
 import { ref, onMounted } from 'vue'
@@ -11410,7 +11410,7 @@ const payUrl = `${baseURL}pay/aliPay?orderId=${route.query.id}&redirect=${redire
 
 Member/components/UserInfo.vue
 
-```JavaScript
+```js
 <script setup>
 const userStore = {}
 </script>
@@ -11546,7 +11546,7 @@ const userStore = {}
 
 Member/components/UserOrder.vue
 
-```JavaScript
+```js
 <script setup>
 // tab列表
 const tabTypes = [
@@ -11816,7 +11816,7 @@ const orderList = []
 
 Member/index.vue
 
-```JavaScript
+```js
 <script setup></script>
 
 <template>
@@ -11911,9 +11911,9 @@ Member/index.vue
 
 ### 会员中心-个人中心信息渲染
 
-apis/user.js
+apis/user.`js
 
-```JavaScript
+```js
 //封装所有和用户相关的接口函数
 import request from "@/utils/http";
 
@@ -11940,7 +11940,7 @@ export const getLikeListAPI = ({ limit = 4 }) => {
 
 Member/components/UserInfo.vue
 
-```JavaScript
+```js
 <script setup>
 import { getLikeListAPI } from '@/apis/user'
 import { useUserStore } from '@/stores/userStore';
@@ -12088,9 +12088,9 @@ onMounted(() => {
 
 ### 会员中心-我的订单实现
 
-apis/order.js
+apis/order.`js
 
-```JavaScript
+```js
 import request from '@/utils/http'
 
 /*
@@ -12113,7 +12113,7 @@ export const getUserOrder = (params) => {
 
 Member/components/UserOrder.vue
 
-```JavaScript
+```js
 <script setup>
 import { getUserOrder } from '@/apis/order';
 import { ref , onMounted } from 'vue'
@@ -12398,7 +12398,7 @@ onMounted(() => {
 
 Member/components/UserOrder.vue
 
-```JavaScript
+```js
 <script setup>
 import { getUserOrder } from '@/apis/order';
 import { ref , onMounted } from 'vue'
@@ -12689,7 +12689,7 @@ const tabChange = (type) => {
 
 Member/components/UserOrder.vue
 
-```JavaScript
+```js
 <script setup>
 import { getUserOrder } from '@/apis/order';
 import { ref , onMounted } from 'vue'

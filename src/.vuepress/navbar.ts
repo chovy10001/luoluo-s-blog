@@ -29,4 +29,16 @@ export default navbar([
     icon: "icon-doc",
     link: "/daily",
   },
+  {
+    text: "软件",
+    icon: "icon-ITruanjian",
+    prefix: "/software",
+    children: [
+      {
+        text: 'obsidian',
+        icon: 'icon-md',
+        link: '/obsidian'
+      }
+    ]
+  }
 ]);

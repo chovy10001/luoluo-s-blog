@@ -8,6 +8,7 @@ export default sidebar({
     text: '前端',
     icon: 'icon-shenjing',
     children: "structure"
-  }
-],
+    },
+  ],
+  "/software/": "structure",
 });
