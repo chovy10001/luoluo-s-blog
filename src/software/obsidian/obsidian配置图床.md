@@ -1,5 +1,6 @@
 ---
 title: obsidian配置图床
+tag: 
 ---
 ## 1. pigGo安装
 [下载地址](https://github.com/Molunerfinn/PicGo/releases)

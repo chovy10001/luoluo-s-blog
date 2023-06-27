@@ -12,7 +12,7 @@ export default hopeTheme({
     name: "luoluo",
     url: "https://luoluo-s-blog.vercel.app/",
   },
-  iconAssets: "//at.alicdn.com/t/c/font_4133807_jze0yhg9lwg.css",
+  iconAssets: "//at.alicdn.com/t/c/font_4133807_m900tvlyei.css",
   iconPrefix: "iconfont ",
 
   logo: "/assets/images/home/me.jpg",

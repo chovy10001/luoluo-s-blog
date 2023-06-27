@@ -21,7 +21,12 @@ export default navbar([
         text: '前端',
         icon: 'icon-shenjing',
         link: '/front-end'
-      }
+      },
+      {
+        text: '运维',
+        icon: 'icon-yunwei-yunweirizhi',
+        link: '/运维'
+      },
     ]
   },
   {
@@ -31,7 +36,7 @@ export default navbar([
   },
   {
     text: "软件",
-    icon: "icon-ITruanjian",
+    icon: "icon-drgspingtairuanjianxitong28",
     prefix: "/software",
     children: [
       {
