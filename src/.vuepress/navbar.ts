@@ -27,6 +27,11 @@ export default navbar([
         icon: 'icon-yunwei-yunweirizhi',
         link: '/运维'
       },
+      {
+        text: '后端',
+        icon: 'icon-houduankaifa',
+        link: '/后端'
+      }
     ]
   },
   {
