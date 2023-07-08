@@ -39,7 +39,7 @@ export default hopeTheme({
   fullscreen: true,
 
   blog: {
-    description: "努力是为了更好的摆烂",
+    description: "如果事事都如意,那就不叫生活了",
     intro: "/intro.html",
     medias: {
       Email: "601119280@qq.com",
