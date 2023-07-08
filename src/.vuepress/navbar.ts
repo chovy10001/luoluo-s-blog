@@ -20,7 +20,7 @@ export default navbar([
       {
         text: '前端',
         icon: 'icon-shenjing',
-        link: '/front-end'
+        link: '/前端'
       },
       {
         text: '运维',
